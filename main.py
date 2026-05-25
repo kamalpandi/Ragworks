@@ -1,79 +1,31 @@
-"""
-Module for the RAG Framework API.
-
-This module initializes the FastAPI application and includes the necessary routes.
-"""
-
-from datetime import datetime, timezone
-
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.ui.router import ui_router
 
-# Initialize FastAPI
 app = FastAPI(
     title="RAG Framework API",
     description="Modular RAG engine",
     version="1.0.0",
     debug=settings.DEBUG,
 )
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite's default dev port
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# Include the versioned API router
+
 app.include_router(api_router, prefix="/api/v1")
-
-
-# Root endpoint for health check
-@app.get("/")
-def health_check():
-    """
-    Health check endpoint.
-
-    Returns the health status of the application along with the current timestamp and configuration settings.
-    """
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "app": {
-            "host": settings.APP_HOST,
-            "port": settings.APP_PORT,
-            "workers": settings.APP_WORKERS,
-            "debug": settings.DEBUG,
-        },
-        "database": {
-            "using_local_db": settings.USE_LOCAL_DB,
-            "db_url": settings.DATABASE_URL,
-        },
-        "models": {
-            "llm_model": settings.LLM_PROVIDER,
-            "embedding_model": settings.EMBEDDING_MODEL,
-            "embedding_dimension": settings.EMBEDDING_DIMENSION,
-            "local_model": settings.LOCAL_MODEL if settings.USE_LOCAL_DB else None,
-        },
-        "rag_settings": {
-            "chunking_strategy": settings.CHUNKING_STRATEGY,
-            "batch_size": settings.BATCH_SIZE,
-            "top_k": settings.TOP_K,
-            "table_parsing_enabled": settings.ENABLE_TABLE_PARSING,
-        },
-        "vector_db": {
-            "provider": "pgvector" if settings.USE_LOCAL_DB else "pinecone",
-            "index_name": settings.PINECONE_INDEX_NAME
-            if not settings.USE_LOCAL_DB
-            else None,
-            "cloud": settings.CLOUD if not settings.USE_LOCAL_DB else None,
-            "region": settings.REGION if not settings.USE_LOCAL_DB else None,
-        },
-    }
-
+app.include_router(ui_router)
 
 if __name__ == "__main__":
     uvicorn.run(

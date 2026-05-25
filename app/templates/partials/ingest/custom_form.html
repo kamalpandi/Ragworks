@@ -1,0 +1,15 @@
+<article class="fade-in">
+  <header><strong>Raw Text Ingestion</strong></header>
+  <form hx-post="/ui/ingest/custom" hx-target="#custom-result">
+    <label for="text">Paste Content</label>
+    <textarea
+      id="text"
+      name="text"
+      rows="4"
+      placeholder="Paste your raw text here..."
+      required
+    ></textarea>
+    <button type="submit">Ingest Text</button>
+  </form>
+  <div id="custom-result" style="margin-top: 1rem; font-weight: bold"></div>
+</article>

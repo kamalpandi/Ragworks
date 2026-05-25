@@ -1,0 +1,28 @@
+{% extends "base.html" %} {% block content %}
+<main class="container">
+  <hgroup>
+    <h1>RAG Engine Control Panel</h1>
+    <p>System monitoring and diagnostics</p>
+  </hgroup>
+
+  <article>
+    <header>System Status</header>
+
+    <div id="health-container">
+      <p hx-get="/ui/health" hx-trigger="load">
+        Fetching system diagnostics...
+      </p>
+    </div>
+
+    <footer>
+      <button
+        class="secondary"
+        hx-get="/ui/health"
+        hx-target="#health-container"
+      >
+        Refresh Status
+      </button>
+    </footer>
+  </article>
+</main>
+{% endblock %}

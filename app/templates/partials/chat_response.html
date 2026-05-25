@@ -1,0 +1,47 @@
+<article
+  style="
+    border-left: 4px solid var(--pico-primary-background);
+    border-radius: 0;
+  "
+>
+  <div style="margin-bottom: 1.5rem">
+    <h4 style="margin-bottom: 0.5rem; color: var(--pico-primary)">
+      AI Response:
+    </h4>
+    <div style="white-space: pre-wrap; line-height: 1.6">
+      {{ result.answer }}
+    </div>
+  </div>
+
+  {% if result.citations %}
+  <details>
+    <summary>
+      <strong>View Document Citations ({{ result.citations|length }})</strong>
+    </summary>
+    <ul style="margin-top: 1rem">
+      {% for citation in result.citations %}
+      <li style="margin-bottom: 1rem">
+        <small>
+          <strong>Page/Chunk:</strong> {{ citation.get('metadata',
+          {}).get('page', citation.get('page', 'N/A')) }} <br />
+
+          <em
+            >{{ citation.get('page_content', citation.get('content',
+            citation.get('text', 'No text snippet available')))[:200] }}...</em
+          >
+        </small>
+      </li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %} {% if result.generated_queries %}
+  <details style="margin-bottom: 0">
+    <summary><strong>View Translation strategy Queries</strong></summary>
+    <ul style="margin-top: 1rem">
+      {% for gq in result.generated_queries %}
+      <li><small>{{ gq }}</small></li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</article>

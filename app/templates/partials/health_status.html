@@ -1,0 +1,52 @@
+<div style="margin-bottom: 1rem">
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    "
+  >
+    <h2 style="margin: 0">
+      Status:
+      <span style="color: var(--pico-ins-color)"
+        >{{ data.status | upper }}</span
+      >
+    </h2>
+    <small style="color: var(--pico-muted-color)"
+      >Updated: {{ data.timestamp[:19] }}</small
+    >
+  </div>
+
+  <div class="grid">
+    <article style="margin: 0; padding: 1.5rem">
+      <header style="margin-bottom: 1rem"><strong>Vector DB</strong></header>
+      <ul style="margin: 0; padding-left: 1rem">
+        <li>Provider: <strong>{{ data.vector_db.provider }}</strong></li>
+        {% if data.vector_db.index_name %}
+        <li>Index: <strong>{{ data.vector_db.index_name }}</strong></li>
+        {% endif %}
+      </ul>
+    </article>
+
+    <article style="margin: 0; padding: 1.5rem">
+      <header style="margin-bottom: 1rem"><strong>Models</strong></header>
+      <ul style="margin: 0; padding-left: 1rem">
+        <li>LLM: <strong>{{ data.models.llm_model }}</strong></li>
+        <li>Embed: <strong>{{ data.models.embedding_model }}</strong></li>
+      </ul>
+    </article>
+
+    <article style="margin: 0; padding: 1.5rem">
+      <header style="margin-bottom: 1rem"><strong>RAG Engine</strong></header>
+      <ul style="margin: 0; padding-left: 1rem">
+        <li>
+          Strategy: <strong>{{ data.rag_settings.chunking_strategy }}</strong>
+        </li>
+        <li>Top K: <strong>{{ data.rag_settings.top_k }}</strong></li>
+      </ul>
+    </article>
+  </div>
+</div>

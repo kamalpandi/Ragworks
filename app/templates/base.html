@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAG Framework</title>
+    <script src="/static/js/htmx.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <nav>
+        <ul>
+          <li><strong>RAG Engine</strong></li>
+        </ul>
+        <ul>
+          <li><a href="/">Dashboard</a></li>
+          <li><a href="/config">Configuration</a></li>
+          <li><a href="/ingest">Ingestion</a></li>
+          <li><a href="/query">Chat / Query</a></li> </ul>
+        </ul>
+      </nav>
+
+      <hr />
+
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

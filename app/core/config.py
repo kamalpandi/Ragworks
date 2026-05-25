@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     APP_WORKERS: int
-    APP_RELOAD: bool = False
-    DEBUG: bool = False
+    APP_RELOAD: bool = True
+    DEBUG: bool = True
     USE_LOCAL_DB: bool = True
 
     # ==========================================
@@ -91,9 +91,12 @@ class Settings(BaseSettings):
     # Local fallback initializer
     LOCAL_MODEL: str = os.getenv(
         "LOCAL_MODEL",
-        f"models/{os.listdir('models')[0]}"
-        if os.path.exists("models") and os.listdir("models")
-        else "models/Hermes-2-Pro-Llama-3-8B.Q4_K_M.gguf",
+        next(
+            (f"models/{f}" for f in os.listdir("models") if f.endswith(".gguf")),
+            "No local model found",
+        )
+        if os.path.exists("models")
+        else "No local model found",
     )
 
 

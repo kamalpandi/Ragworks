@@ -1,0 +1,13 @@
+<article class="fade-in">
+  <header><strong>Upload Document</strong></header>
+  <form
+    hx-post="/ui/ingest/file"
+    hx-encoding="multipart/form-data"
+    hx-target="#file-result"
+  >
+    <label for="file">PDF or TXT File</label>
+    <input type="file" id="file" name="file" accept=".pdf,.txt" required />
+    <button type="submit">Process File</button>
+  </form>
+  <div id="file-result" style="margin-top: 1rem; font-weight: bold"></div>
+</article>

@@ -1,0 +1,12 @@
+{% extends "base.html" %} {% block content %}
+<hgroup>
+  <h1>System Configuration</h1>
+  <p>Active backend and frontend settings</p>
+</hgroup>
+
+<article>
+  <div id="config-container">
+    <p hx-get="/ui/config/data" hx-trigger="load">Loading configuration...</p>
+  </div>
+</article>
+{% endblock %}

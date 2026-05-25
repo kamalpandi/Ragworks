@@ -1,0 +1,89 @@
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Request, UploadFile
+from fastapi.responses import HTMLResponse
+
+from app.components.loaders.pdf_loader import parse_pdf
+from app.components.loaders.web_loader import parse_url
+from app.core.dependencies import get_ingestion_service
+from app.ui import templates
+
+router = APIRouter()
+
+
+# --- Ingestion UI Page ---
+@router.get("/ingest", response_class=HTMLResponse)
+def ingest_page(request: Request):
+    """Renders the main Ingestion layout shell"""
+    return templates.TemplateResponse(request=request, name="pages/ingest.html")
+
+
+# --- HTMX Tab Form Providers ---
+@router.get("/ui/ingest/form/file", response_class=HTMLResponse)
+def get_file_form(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="partials/ingest/file_form.html"
+    )
+
+
+@router.get("/ui/ingest/form/url", response_class=HTMLResponse)
+def get_url_form(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="partials/ingest/url_form.html"
+    )
+
+
+@router.get("/ui/ingest/form/custom", response_class=HTMLResponse)
+def get_custom_form(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="partials/ingest/custom_form.html"
+    )
+
+
+# --- HTMX Form Handlers ---
+@router.post("/ui/ingest/file", response_class=HTMLResponse)
+async def ui_ingest_file(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    service=Depends(get_ingestion_service),
+):
+    if not file.filename:
+        return "<span style='color: var(--pico-del-color);'>Missing filename.</span>"
+
+    text = ""
+    if file.filename.endswith(".pdf"):
+        text = await parse_pdf(file)
+    elif file.filename.endswith(".txt"):
+        content = await file.read()
+        text = content.decode("utf-8")
+    else:
+        return (
+            "<span style='color: var(--pico-del-color);'>Unsupported file type.</span>"
+        )
+
+    background_tasks.add_task(
+        service.ingest_texts, texts=[text], source_name=file.filename
+    )
+    return f"<span style='color: var(--pico-ins-color);'>'{file.filename}' queued for background processing!</span>"
+
+
+@router.post("/ui/ingest/url", response_class=HTMLResponse)
+async def ui_ingest_url(
+    background_tasks: BackgroundTasks,
+    url: str = Form(...),
+    service=Depends(get_ingestion_service),
+):
+    result = await parse_url(url, respect_robots=False)
+    if not result.text:
+        return "<span style='color: var(--pico-del-color);'>Could not extract text from URL.</span>"
+
+    background_tasks.add_task(
+        service.ingest_texts, texts=[result.text], source_name=url
+    )
+    return f"<span style='color: var(--pico-ins-color);'>URL extraction for '{url}' started!</span>"
+
+
+@router.post("/ui/ingest/custom", response_class=HTMLResponse)
+async def ui_ingest_custom(
+    text: str = Form(...), service=Depends(get_ingestion_service)
+):
+    await service.ingest_texts([text], source_name="manual_upload")
+    return "<span style='color: var(--pico-ins-color);'>Custom text successfully ingested!</span>"

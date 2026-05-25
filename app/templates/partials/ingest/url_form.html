@@ -1,0 +1,15 @@
+<article class="fade-in">
+  <header><strong>Scrape URL</strong></header>
+  <form hx-post="/ui/ingest/url" hx-target="#url-result">
+    <label for="url">Website Address</label>
+    <input
+      type="url"
+      id="url"
+      name="url"
+      placeholder="https://example.com"
+      required
+    />
+    <button type="submit">Extract Content</button>
+  </form>
+  <div id="url-result" style="margin-top: 1rem; font-weight: bold"></div>
+</article>

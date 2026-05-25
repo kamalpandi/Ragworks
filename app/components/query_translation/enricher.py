@@ -99,7 +99,7 @@ def enrich_query(message: str, file_name: str | None) -> str:
     prefix = INTENT_PREFIXES[intent]
 
     if _is_vague(message):
-        return f"{prefix} {topic}. Source: {file_name}"
+        return f"{prefix} {topic}. User's request: '{message}'. Source: {file_name}"
     return f"{message} (from: {topic}) Source: {file_name}"
 
 

@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block content %}
+<main class="container">
+  <hgroup>
+    <h1>Knowledge Ingestion</h1>
+    <p>Select your ingestion method.</p>
+  </hgroup>
+
+  <nav
+    style="
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      margin-bottom: 2rem;
+      padding-bottom: 0.5rem;
+    "
+  >
+    <ul>
+      <li>
+        <a
+          href="#"
+          hx-get="/ui/ingest/form/file"
+          hx-target="#ingest-container"
+          class="contrast"
+        >
+          <strong>📄 Upload Document</strong>
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          hx-get="/ui/ingest/form/url"
+          hx-target="#ingest-container"
+          class="contrast"
+        >
+          <strong>🌐 Scrape URL</strong>
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          hx-get="/ui/ingest/form/custom"
+          hx-target="#ingest-container"
+          class="contrast"
+        >
+          <strong>✍️ Raw Text</strong>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div id="ingest-container">
+    <p hx-get="/ui/ingest/form/file" hx-trigger="load">Loading form...</p>
+  </div>
+</main>
+{% endblock %}

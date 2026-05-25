@@ -1,0 +1,166 @@
+<article style="padding: 1rem 2rem">
+  <details
+    open
+    style="
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    "
+  >
+    <summary><strong>Core Application Metadata</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Host Address</strong></td>
+          <td>{{ settings.APP_HOST }}:{{ settings.APP_PORT }}</td>
+        </tr>
+        <tr>
+          <td><strong>Debug Mode</strong></td>
+          <td>
+            {% if settings.DEBUG %}
+            <span style="color: var(--pico-ins-color)">Enabled</span>
+            {% else %}
+            <span style="color: var(--pico-del-color)">Disabled</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Local Database</strong></td>
+          <td>{{ settings.USE_LOCAL_DB }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details
+    style="
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    "
+  >
+    <summary><strong>Dynamic Model Providers & Engines</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>LLM Provider</strong></td>
+          <td>{{ settings.LLM_PROVIDER }}</td>
+        </tr>
+        <tr>
+          <td><strong>Local Model Setup</strong></td>
+          <td>{{ settings.LOCAL_MODEL }}</td>
+        </tr>
+        <tr>
+          <td><strong>Active Model</strong></td>
+          <td>{{ settings.LLM_MODEL }}</td>
+        </tr>
+        {% if settings.OLLAMA_MODEL %}
+        <tr>
+          <td><strong>Ollama Model</strong></td>
+          <td>{{ settings.OLLAMA_MODEL }}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </details>
+
+  <details
+    style="
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    "
+  >
+    <summary><strong>Guardrails & Token Constraints</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Temperature</strong></td>
+          <td>{{ settings.LLM_TEMP }}</td>
+        </tr>
+        <tr>
+          <td><strong>Max Tokens</strong></td>
+          <td>{{ settings.LLM_MAX_TOKENS }}</td>
+        </tr>
+        <tr>
+          <td><strong>Context Window (n_ctx)</strong></td>
+          <td>{{ settings.LLM_N_CTX }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details
+    style="
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    "
+  >
+    <summary><strong>Embeddings & Vector Space Data</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Model</strong></td>
+          <td>{{ settings.EMBEDDING_MODEL }}</td>
+        </tr>
+        <tr>
+          <td><strong>Dimension</strong></td>
+          <td>{{ settings.EMBEDDING_DIMENSION }}</td>
+        </tr>
+        <tr>
+          <td><strong>Max Tokens</strong></td>
+          <td>{{ settings.EMBEDDING_MODEL_MAX_TOKEN }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details
+    style="
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    "
+  >
+    <summary><strong>Pipeline RAG Orchestration</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Chunking Strategy</strong></td>
+          <td>{{ settings.CHUNKING_STRATEGY }}</td>
+        </tr>
+        <tr>
+          <td><strong>Table Parsing</strong></td>
+          <td>{{ settings.ENABLE_TABLE_PARSING }}</td>
+        </tr>
+        <tr>
+          <td><strong>Top K Retrieval</strong></td>
+          <td>{{ settings.TOP_K }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details style="margin-bottom: 0">
+    <summary><strong>Database / Infrastructure Ecosystem</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Index Name</strong></td>
+          <td>{{ settings.PINECONE_INDEX_NAME }}</td>
+        </tr>
+        <tr>
+          <td><strong>Batch Size</strong></td>
+          <td>{{ settings.BATCH_SIZE }}</td>
+        </tr>
+        {% if settings.CLOUD %}
+        <tr>
+          <td><strong>Cloud Environment</strong></td>
+          <td>{{ settings.CLOUD }} ({{ settings.REGION }})</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </details>
+</article>

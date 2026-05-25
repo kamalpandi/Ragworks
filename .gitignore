@@ -14,3 +14,7 @@ wheels/
 .opencode
 # Ai Models
 models/*
+
+# Mac OS
+.DS_Store
+**/.DS_Store

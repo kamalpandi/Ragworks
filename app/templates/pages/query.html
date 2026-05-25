@@ -1,0 +1,87 @@
+{% extends "base.html" %} {% block content %}
+<main class="container">
+  <hgroup>
+    <h1>Document Query</h1>
+    <p>Ask questions against specific ingested files in your knowledge base.</p>
+  </hgroup>
+
+  <div class="grid">
+    <div>
+      <article>
+        <header><strong>Query Settings</strong></header>
+        <div style="margin-bottom: 1rem">
+          <label for="file_name">Target Document (Required)</label>
+          <input
+            type="text"
+            id="file_name"
+            form="chat-form"
+            name="file_name"
+            placeholder="e.g., manual.pdf"
+            required
+          />
+          <small>Queries are strictly isolated to this file.</small>
+        </div>
+
+        <div style="margin-bottom: 1rem">
+          <label for="translation_strategy">Translation Strategy</label>
+          <select
+            id="translation_strategy"
+            form="chat-form"
+            name="translation_strategy"
+          >
+            <option value="">None (Standard Query)</option>
+            <option value="multi_query">Multi-Query</option>
+            <option value="hyde">
+              HyDE (Hypothetical Document Embeddings)
+            </option>
+            <option value="step_back">Step-Back Prompting</option>
+            <option value="rag_fusion">RAG Fusion</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="prompt_name">System Prompt (Optional)</label>
+          <input
+            type="text"
+            id="prompt_name"
+            form="chat-form"
+            name="prompt_name"
+            placeholder="e.g., custom_prompt"
+          />
+        </div>
+      </article>
+    </div>
+
+    <div>
+      <form
+        id="chat-form"
+        hx-post="/ui/query/chat"
+        hx-target="#chat-result"
+        hx-indicator="#loading-spinner"
+      >
+        <label for="message"><strong>Your Question</strong></label>
+        <textarea
+          id="message"
+          name="message"
+          rows="3"
+          placeholder="What does the document say about..."
+          required
+        ></textarea>
+
+        <button type="submit">Ask RAG Engine</button>
+      </form>
+
+      <div
+        id="loading-spinner"
+        class="htmx-indicator"
+        style="text-align: center; margin: 2rem 0"
+      >
+        <progress></progress>
+        <p><small>Analyzing document and generating response...</small></p>
+      </div>
+
+      <div id="chat-result" style="margin-top: 2rem"></div>
+    </div>
+  </div>
+</main>
+{% endblock %}
