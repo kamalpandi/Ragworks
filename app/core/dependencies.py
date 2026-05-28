@@ -10,6 +10,10 @@ from app.services.rag_engine import RAGEngine
 USE_LOCAL_DB: bool = settings.USE_LOCAL_DB
 
 
+def get_vector_db():
+    return get_db()
+
+
 def get_db():
     if USE_LOCAL_DB:
         print("Using Local PGVector")

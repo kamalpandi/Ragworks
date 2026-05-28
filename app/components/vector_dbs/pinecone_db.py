@@ -62,6 +62,9 @@ class PineconeDB(BaseVectorDB):
 
         self.index.upsert(vectors=vectors)
 
+    async def get_distinct_sources(self) -> List[str]:
+        return []
+
     async def search(
         self,
         query_vector: List[float],

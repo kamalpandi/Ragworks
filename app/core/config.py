@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
 
     # Llama.cpp Remote / Local Specifics
-    REMOTE_LLAMACPP_URL: str = "http://192.168.29.106:8080"
+    REMOTE_LLAMACPP_URL: str
     MODELS_DIR: str = "models"
 
     # ==========================================

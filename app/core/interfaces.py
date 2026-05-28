@@ -29,6 +29,11 @@ class BaseVectorDB(ABC):
     ) -> List[DocumentChunk]:
         pass
 
+    @abstractmethod
+    async def get_distinct_sources(self) -> List[str]:
+        """Return a list of distinct source names in the database."""
+        pass
+
 
 class BaseLLM(ABC):
     @abstractmethod

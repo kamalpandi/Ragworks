@@ -83,6 +83,17 @@ class PGVectorDB(BaseVectorDB):
                     data,
                 )
 
+    async def get_distinct_sources(self) -> List[str]:
+        async with await self._get_async_connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    SQL("SELECT DISTINCT metadata->>'source' AS source FROM {table} ORDER BY source").format(
+                        table=Identifier(self.table_name)
+                    )
+                )
+                rows = await cur.fetchall()
+                return [str(row["source"]) for row in rows if row.get("source")]
+
     async def search(
         self,
         query_vector: List[float],
