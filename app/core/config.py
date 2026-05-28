@@ -16,14 +16,14 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     APP_WORKERS: int
-    APP_RELOAD: bool = True
-    DEBUG: bool = True
+    APP_RELOAD: bool = False
+    DEBUG: bool = False
     USE_LOCAL_DB: bool = True
 
     # ==========================================
     # 2. Dynamic Model Providers & Engines
     # ==========================================
-    LLM_PROVIDER: Literal["openai", "ollama", "llamacpp"] = "openai"
+    LLM_PROVIDER: Literal["openai", "ollama", "llamacpp"] = "llamacpp"
     LLM_MODEL: str = "gpt-4o-mini"
 
     # Ollama Specifics
