@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # ==========================================
     # 2. Dynamic Model Providers & Engines
     # ==========================================
-    LLM_PROVIDER: Literal["openai", "ollama", "llamacpp"] = "llamacpp"
+    LLM_PROVIDER: Literal["openai", "ollama", "llamacpp"] = "openai"
     LLM_MODEL: str = "gpt-4o-mini"
 
     # Ollama Specifics
