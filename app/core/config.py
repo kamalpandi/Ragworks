@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # ==========================================
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
-    APP_WORKERS: int
+    APP_WORKERS: int = 1
     APP_RELOAD: bool = False
     DEBUG: bool = False
     USE_LOCAL_DB: bool = True
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
 
     # Llama.cpp Remote / Local Specifics
-    REMOTE_LLAMACPP_URL: str
+    REMOTE_LLAMACPP_URL: str = "http://192.168.0.225:8080"
     MODELS_DIR: str = "models"
 
     # ==========================================
