@@ -65,6 +65,9 @@ graph LR
 - **[+] HTMX Web UI:** Built-in dashboard, query chat, ingestion, and config pages powered by htmx — no JavaScript framework required.
 - **[+] Frontend Configuration:** Dedicated `/api/v1/config` endpoint to expose non-sensitive backend settings to clients.
 - **[+] External App Support:** The RAG system exposes a clean HTTP API, allowing external validator scripts or services to use ingested knowledge without modifying the core.
+- **[+] Inline Custom Prompts:** Pass a `custom_prompt` directly in API queries to override the system prompt on a per-request basis — no file editing needed.
+- **[+] File Discovery API:** `GET /api/v1/ingest/files` lists all ingested document source names for external scripting and UI autocomplete.
+- **[+] Prompt Library UI:** Browse all system and user prompt templates with their full content at `/prompts`.
 
 ## Getting Started
 
@@ -202,6 +205,20 @@ curl -X POST "http://localhost:8000/api/v1/query" \
   }'
 ```
 
+**Ingest Custom Text**
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/ingest/custom" \
+  -H "Content-Type: application/json" \
+  -d '{"texts": ["Custom knowledge base entry one.", "Another section of text."]}'
+```
+
+**List Ingested Files**
+
+```bash
+curl "http://localhost:8000/api/v1/ingest/files"
+```
+
 **Query with a Translation Strategy**
 
 ```bash
@@ -211,6 +228,18 @@ curl -X POST "http://localhost:8000/api/v1/query" \
     "message": "What are the opt-out requirements?",
     "file_name": "can_spam_guide.pdf",
     "translation_strategy": "multi_query"
+  }'
+```
+
+**Query with a Custom System Prompt**
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What are the risks mentioned?",
+    "file_name": "annual_report.pdf",
+    "custom_prompt": "You are a risk analyst. Focus on financial and regulatory risks only. Be concise."
   }'
 ```
 
@@ -224,6 +253,7 @@ The framework includes a fully functional web interface powered by **htmx** and 
 | Chat      | `/query`    | Ask questions against ingested documents              |
 | Ingest    | `/ingest`   | Upload PDFs, scrape URLs, or paste raw text           |
 | Config    | `/config`   | View non-sensitive backend configuration              |
+| Prompts   | `/prompts`  | Browse system and user prompt templates with content  |
 
 ### Query Page Features
 - **Conversation Thread:** Each Q&A pair is appended — history is preserved across queries.
@@ -371,7 +401,13 @@ rag-framework/
 │   ├── templates/            # Jinja2 HTML templates (htmx UI)
 │   │   ├── pages/            # Full page templates
 │   │   └── partials/         # HTMX swap fragments
-│   └── ui/                   # HTMX UI route handlers
+│   ├── ui/                   # HTMX UI route handlers
+│   │   ├── router.py
+│   │   ├── dashboard.py
+│   │   ├── config.py
+│   │   ├── ingest.py
+│   │   ├── query.py
+│   │   └── prompts.py
 ├── scripts/                  # Standalone consumer scripts
 │   ├── emails/
 │   │   └── validator.py      # CAN-SPAM email compliance checker
@@ -427,6 +463,9 @@ This happens automatically at the router level — no configuration needed.
 - [x] **Dynamic Vector Tables:** Auto-scaling DB schema.
 - [x] **Local LLM:** Llama 3 via `llama.cpp` + Ollama.
 - [x] **Advanced PDF Parsing:** Markdown table extraction.
+- [x] **Custom Prompt API:** Per-request inline `custom_prompt` override via API and UI.
+- [x] **File Discovery Endpoint:** `GET /api/v1/ingest/files` for listing ingested documents.
+- [x] **Prompt Library UI:** Dedicated `/prompts` page to browse all prompt templates.
 
 ## Contribution Guidelines
 
