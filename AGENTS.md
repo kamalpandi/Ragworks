@@ -31,7 +31,11 @@ This document provides high-signal instructions for working in this repository.
       Hermes-2-Pro-Llama-3-8B-Q4_K_M.gguf \
       --local-dir models
     ```
-*   **Code Formatting:** The project uses `ruff`.
+*   **Code Formatting:**
+    ```bash
+    ruff check .      # lint
+    ruff format .     # format
+    ```
 
 ## Architecture Notes
 
@@ -49,7 +53,7 @@ This document provides high-signal instructions for working in this repository.
 *   **Virtual Environment & Dependencies:** Use `uv` for managing the Python environment and dependencies.
 *   **Configuration:** All environment variables for configuration are managed via a `.env` file in the root directory.
 *   **New Vector DB Implementations:** Must inherit from `app.core.interfaces.BaseVectorDB`.
-*   **New Domain Prompts:** Place new `.txt` prompt files in `app/prompts/`.
+*   **New Domain Prompts:** Place new `.md` prompt files in `app/prompts/system/` or `app/prompts/user/`.
 *   **External Scripts:** Place any scripts that consume the RAG API (e.g., data validators, batch processors) in the `scripts/` directory.
 
 ## Setup & Environment Quirks
@@ -57,5 +61,5 @@ This document provides high-signal instructions for working in this repository.
 *   **Python Version:** Requires Python 3.12+.
 *   **Docker:** Essential for local development if using the PGVector database.
 *   **API Key:** An `OPENAI_API_KEY` is required.
-*   **Local LLM:** If using a local LLM, `LOCAL_MODEL_PATH` in `.env` must point to the GGUF model file.
+*   **Local LLM:** If using a local LLM, `LOCAL_MODEL` in `.env` may point to the GGUF model file. If unset, the system auto-detects `.gguf` files in `models/`.
 *   **System Prompt:** The `SYSTEM_PROMPT_FILE` in `.env` determines which prompt from `app/prompts/` is used.

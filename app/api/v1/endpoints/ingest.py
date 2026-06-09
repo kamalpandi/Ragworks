@@ -10,7 +10,7 @@ from fastapi import (
 
 from app.components.loaders.pdf_loader import parse_pdf
 from app.components.loaders.web_loader import parse_url
-from app.core.dependencies import get_ingestion_service
+from app.core.dependencies import get_ingestion_service, get_vector_db
 from app.models.api_requests import IngestRequest, UrlIngestRequest
 from app.models.api_response import IngestResponse
 
@@ -90,3 +90,9 @@ async def ingest_custom_text(
     """Ingest any list of strings directly as JSON."""
     await service.ingest_texts(request.texts, source_name="manual_upload")
     return IngestResponse(status="success", count=len(request.texts))
+
+
+@router.get("/files", summary="List all ingested document source names")
+async def list_ingested_files(vector_db=Depends(get_vector_db)):
+    sources = await vector_db.get_distinct_sources()
+    return {"sources": sources, "count": len(sources)}

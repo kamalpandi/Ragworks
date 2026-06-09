@@ -3,9 +3,7 @@ import asyncio
 import httpx
 
 RAG_API_URL = "http://localhost:8000/api/v1/query"
-CAN_SPAM_FILE = (
-    "CAN-SPAM_Act__A_Compliance_Guide_for_Business___Federal_Trade_Commission.pdf" #CAN-SPAM_Act__A_Compliance_Guide_for_Business___Federal_Trade_Commission.pdf
-)
+CAN_SPAM_FILE = "CAN-SPAM_Act__A_Compliance_Guide_for_Business___Federal_Trade_Commission.pdf"  # CAN-SPAM_Act__A_Compliance_Guide_for_Business___Federal_Trade_Commission.pdf
 
 
 async def validate_email(email_content: str) -> dict:
@@ -23,7 +21,7 @@ async def validate_email(email_content: str) -> dict:
                 "message": query,
                 "file_name": CAN_SPAM_FILE,
                 "translation_strategy": None,
-                "prompt_name": "can_spam"
+                "prompt_name": "can_spam",
             },
         )
     return response.json()

@@ -27,3 +27,6 @@ class ChatRequest(BaseModel):
     prompt_name: Optional[str] = Field(
         None, description="Name of the system prompt to use"
     )
+    custom_prompt: Optional[str] = Field(
+        None, description="Custom system prompt text. Overrides prompt_name if set."
+    )

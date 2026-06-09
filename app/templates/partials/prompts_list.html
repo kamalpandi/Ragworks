@@ -1,0 +1,47 @@
+<div style="display: flex; gap: 2rem; flex-wrap: wrap">
+  <div style="flex: 1; min-width: 300px">
+    <h2>System Prompts</h2>
+    {% if system_prompts %} {% for prompt in system_prompts %}
+    <article style="padding: 1rem; margin-bottom: 1rem">
+      <header>
+        <strong>{{ prompt.name | replace('_', ' ') | title }}</strong>
+      </header>
+      <pre
+        style="
+          white-space: pre-wrap;
+          background: var(--pico-card-background-color);
+          padding: 0.75rem;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          margin: 0;
+        "
+      >{{ prompt.content }}</pre>
+    </article>
+    {% endfor %} {% else %}
+    <p style="color: var(--pico-muted-color)">No system prompts found.</p>
+    {% endif %}
+  </div>
+
+  <div style="flex: 1; min-width: 300px">
+    <h2>User Prompts</h2>
+    {% if user_prompts %} {% for prompt in user_prompts %}
+    <article style="padding: 1rem; margin-bottom: 1rem">
+      <header>
+        <strong>{{ prompt.name | replace('_', ' ') | title }}</strong>
+      </header>
+      <pre
+        style="
+          white-space: pre-wrap;
+          background: var(--pico-card-background-color);
+          padding: 0.75rem;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          margin: 0;
+        "
+      >{{ prompt.content }}</pre>
+    </article>
+    {% endfor %} {% else %}
+    <p style="color: var(--pico-muted-color)">No user prompts found.</p>
+    {% endif %}
+  </div>
+</div>

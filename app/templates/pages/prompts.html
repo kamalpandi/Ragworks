@@ -1,0 +1,12 @@
+{% extends "base.html" %} {% block content %}
+<main class="container">
+  <hgroup>
+    <h1>Prompt Library</h1>
+    <p>Browse loaded system and user prompt templates.</p>
+  </hgroup>
+
+  <div id="prompts-container">
+    <p hx-get="/ui/prompts/load" hx-trigger="load">Loading prompts...</p>
+  </div>
+</main>
+{% endblock %}

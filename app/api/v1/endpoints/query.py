@@ -21,6 +21,7 @@ async def query_knowledge_base(request: ChatRequest, engine=Depends(get_rag_engi
     - **file_name**: MANDATORY target file. Other documents will not be touched.
     - **translation_strategy**: Optional strategy (multi_query, hyde, etc.)
     - **prompt_name**: Optional custom system prompt name
+    - **custom_prompt**: Optional inline custom system prompt text (overrides prompt_name)
     """
     if not request.file_name.strip():
         raise HTTPException(
@@ -31,7 +32,12 @@ async def query_knowledge_base(request: ChatRequest, engine=Depends(get_rag_engi
             },
         )
 
-    system_report = load_prompt(request.prompt_name) if request.prompt_name else None
+    if request.custom_prompt and request.custom_prompt.strip():
+        system_report = request.custom_prompt.strip()
+    elif request.prompt_name:
+        system_report = load_prompt(request.prompt_name)
+    else:
+        system_report = None
     enriched_query = enrich_query(request.message, request.file_name)
 
     try:
