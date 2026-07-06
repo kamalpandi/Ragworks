@@ -11,6 +11,9 @@ class QueryResponse(BaseModel):
     generated_queries: List[str] = Field(
         default_factory=list, description="List of queries generated for retrieval"
     )
+    thread_id: Optional[str] = Field(
+        None, description="Conversation thread ID for follow-up questions"
+    )
 
 
 class IngestResponse(BaseModel):

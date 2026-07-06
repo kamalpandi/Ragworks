@@ -7,6 +7,9 @@ from pinecone.grpc import PineconeGRPC as Pinecone
 from app.core.config import settings
 from app.core.interfaces import BaseVectorDB
 from app.models.domain import DocumentChunk
+from app.observability.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class PineconeDB(BaseVectorDB):
@@ -40,7 +43,12 @@ class PineconeDB(BaseVectorDB):
                     break
                 time.sleep(1)
 
-    async def upsert(self, chunks: List[DocumentChunk], embeddings: List[List[float]]):
+    async def upsert(
+        self,
+        chunks: List[DocumentChunk],
+        embeddings: List[List[float]],
+        tenant_id: str = "default",
+    ):
         if len(chunks) != len(embeddings):
             raise ValueError("Number of chunks and embeddings must match!")
 
@@ -60,9 +68,9 @@ class PineconeDB(BaseVectorDB):
                 )
             )
 
-        self.index.upsert(vectors=vectors)
+        self.index.upsert(vectors=vectors, namespace=tenant_id)
 
-    async def get_distinct_sources(self) -> List[str]:
+    async def get_distinct_sources(self, tenant_id: str = "default") -> List[str]:
         return []
 
     async def search(
@@ -70,6 +78,7 @@ class PineconeDB(BaseVectorDB):
         query_vector: List[float],
         top_k: int,
         filters: Optional[Dict[str, Any]] = None,
+        tenant_id: str = "default",
     ) -> List[DocumentChunk]:
         if len(query_vector) != settings.EMBEDDING_DIMENSION:
             raise ValueError(
@@ -82,6 +91,7 @@ class PineconeDB(BaseVectorDB):
             top_k=top_k,
             include_metadata=True,
             filter=filters,
+            namespace=tenant_id,
         )
 
         res = cast(Any, raw_res)
@@ -99,5 +109,4 @@ class PineconeDB(BaseVectorDB):
                     score=float(match.score) if match.score is not None else 0.0,
                 )
             )
-        print("[Pinecone Search]")
         return results

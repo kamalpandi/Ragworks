@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAG Framework - Login</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .login-container {
+        max-width: 480px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container login-container">
+      <article>
+        <header>
+          <h1>RAG Engine</h1>
+          <p>Enter your API key to access the dashboard.</p>
+        </header>
+
+        <form id="login-form">
+          <label for="api_key">API Key</label>
+          <input
+            type="password"
+            id="api_key"
+            name="api_key"
+            placeholder="rag-..."
+            autocomplete="off"
+            required
+          />
+          <input type="hidden" name="next_path" value="{{ next }}" />
+
+          <div id="error-message" style="display: none; color: var(--pico-del-color); margin-bottom: 1rem;"></div>
+
+          <button type="submit">Login</button>
+        </form>
+
+        <footer>
+          <small>
+            Don't have an API key? Ask your administrator to create one via the
+            <code>POST /api/v1/admin/api-keys</code> endpoint.
+          </small>
+        </footer>
+      </article>
+    </main>
+
+    <script>
+      document.getElementById("login-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        var errorEl = document.getElementById("error-message");
+        errorEl.style.display = "none";
+
+        var formData = new FormData(this);
+
+        try {
+          var response = await fetch("/login", {
+            method: "POST",
+            body: formData,
+          });
+
+          var data = await response.json();
+
+          if (data.success) {
+            localStorage.setItem("rag_api_key", data.api_key);
+            localStorage.setItem("rag_tenant_id", data.tenant_id);
+            document.cookie = "rag_api_key=" + encodeURIComponent(data.api_key) + "; path=/; SameSite=Lax";
+            var nextPath = formData.get("next_path") || "/";
+            window.location.href = nextPath;
+          } else {
+            errorEl.textContent = data.error || "Login failed";
+            errorEl.style.display = "block";
+          }
+        } catch (err) {
+          errorEl.textContent = "Network error. Please try again.";
+          errorEl.style.display = "block";
+        }
+      });
+    </script>
+  </body>
+</html>

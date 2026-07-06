@@ -1,0 +1,33 @@
+{% if results %}
+<table class="striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Date</th>
+      <th>Dataset</th>
+      <th>Samples</th>
+      <th>Scores</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in results %}
+    <tr>
+      <td><small>{{ r.id }}</small></td>
+      <td><small>{{ r.timestamp[:19] }}</small></td>
+      <td>{{ r.dataset_name }}</td>
+      <td>{{ r.num_samples }}</td>
+      <td>
+        {% for name, val in r.aggregated_scores.items() %}
+        <div style="display: flex; justify-content: space-between; gap: 1rem">
+          <small>{{ name }}</small>
+          <strong>{{ "%.4f"|format(val) }}</strong>
+        </div>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p><em>No evaluation results yet. Run an evaluation above.</em></p>
+{% endif %}

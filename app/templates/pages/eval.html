@@ -1,0 +1,81 @@
+{% extends "base.html" %} {% block content %}
+<main class="container">
+  <hgroup>
+    <h1>Evaluation</h1>
+    <p>Run RAG quality benchmarks and compare results</p>
+  </hgroup>
+
+  <article>
+    <header>Available Metrics</header>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem">
+      {% for metric in metrics %}
+      <kbd>{{ metric }}</kbd>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article>
+    <header>Run Evaluation from HuggingFace Dataset</header>
+    <form action="/api/v1/eval/run" method="post" target="_blank">
+      <div style="display: flex; gap: 1rem; align-items: end">
+        <label>
+          Dataset Name
+          <input
+            name="from_huggingface"
+            placeholder="explodinggradients/ragas-wikiqa-city"
+          />
+        </label>
+        <label>
+          Max Samples
+          <input name="max_samples" type="number" value="10" />
+        </label>
+        <label>
+          Metrics
+          <input name="metric_names" value="faithfulness,context_precision" />
+        </label>
+        <button type="submit">Run</button>
+      </div>
+    </form>
+  </article>
+
+  <article>
+    <header>Run Evaluation from File</header>
+    <form
+      action="/api/v1/eval/run/file"
+      method="post"
+      enctype="multipart/form-data"
+      target="_blank"
+    >
+      <div style="display: flex; gap: 1rem; align-items: end">
+        <label>
+          JSON Dataset
+          <input type="file" name="file" accept=".json" />
+        </label>
+        <label>
+          Metrics
+          <input name="metric_names" value="faithfulness,context_precision" />
+        </label>
+        <button type="submit">Upload & Run</button>
+      </div>
+    </form>
+  </article>
+
+  <article>
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <span>Historical Results</span>
+        <button
+          hx-get="/ui/eval/results"
+          hx-target="#eval-results"
+          class="secondary"
+        >
+          Refresh
+        </button>
+      </div>
+    </header>
+    <div id="eval-results" hx-get="/ui/eval/results" hx-trigger="load">
+      <p>Loading results...</p>
+    </div>
+  </article>
+</main>
+{% endblock %}

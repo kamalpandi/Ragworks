@@ -163,4 +163,96 @@
       </tbody>
     </table>
   </details>
+
+  <details style="margin-bottom: 0; margin-top: 1rem">
+    <summary><strong>Reranker Configuration</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Reranker Enabled</strong></td>
+          <td>
+            {% if settings.RERANKER_ENABLED %}
+            <span style="color: var(--pico-ins-color)">Enabled</span>
+            {% else %}
+            <span style="color: var(--pico-del-color)">Disabled</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Provider</strong></td>
+          <td>{{ settings.RERANKER_PROVIDER }}</td>
+        </tr>
+        <tr>
+          <td><strong>Retrieval Top-K</strong></td>
+          <td>{{ settings.RETRIEVAL_TOP_K }}</td>
+        </tr>
+        <tr>
+          <td><strong>Rerank Top-K</strong></td>
+          <td>{{ settings.RERANK_TOP_K }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details style="margin-bottom: 0; margin-top: 1rem">
+    <summary><strong>Observability & Tracing</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Observability Enabled</strong></td>
+          <td>
+            {% if settings.OBSERVABILITY_ENABLED %}
+            <span style="color: var(--pico-ins-color)">Enabled</span>
+            {% else %}
+            <span style="color: var(--pico-del-color)">Disabled</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Log Level</strong></td>
+          <td>{{ settings.LOG_LEVEL }}</td>
+        </tr>
+        <tr>
+          <td><strong>Log Format</strong></td>
+          <td>{{ settings.LOG_FORMAT }}</td>
+        </tr>
+        <tr>
+          <td><strong>OTEL Exporter</strong></td>
+          <td>{{ settings.OTEL_EXPORTER_TYPE }}</td>
+        </tr>
+        {% if settings.OTEL_EXPORTER_ENDPOINT %}
+        <tr>
+          <td><strong>OTEL Endpoint</strong></td>
+          <td>{{ settings.OTEL_EXPORTER_ENDPOINT }}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </details>
+
+  <details style="margin-bottom: 0; margin-top: 1rem">
+    <summary><strong>Evaluation</strong></summary>
+    <table class="striped" style="margin-top: 1rem; margin-bottom: 0">
+      <tbody>
+        <tr>
+          <td style="width: 35%"><strong>Eval Enabled</strong></td>
+          <td>
+            {% if settings.EVAL_ENABLED %}
+            <span style="color: var(--pico-ins-color)">Enabled</span>
+            {% else %}
+            <span style="color: var(--pico-del-color)">Disabled</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Active Metrics</strong></td>
+          <td>{{ settings.EVAL_METRICS | join(", ") }}</td>
+        </tr>
+        <tr>
+          <td><strong>Results Directory</strong></td>
+          <td>{{ settings.EVAL_RESULTS_DIR }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
 </article>

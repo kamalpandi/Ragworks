@@ -9,6 +9,9 @@ import httpx
 from bs4 import BeautifulSoup, Tag
 
 from app.models.web_loader import ScrapeResult
+from app.observability.logger import get_logger
+
+logger = get_logger(__name__)
 
 # ── Rotate through realistic browser fingerprints ──────────────────────────────
 USER_AGENTS = [
@@ -143,7 +146,7 @@ async def parse_url(
     empty = ScrapeResult(text="", url=url)
 
     if respect_robots and not _is_allowed_by_robots(url):
-        print(f"[robots.txt] Blocked: {url}")
+        logger.info("robots_blocked", url=url)
         return empty
 
     client_kwargs: dict = {
@@ -168,7 +171,7 @@ async def parse_url(
             encoding = response.encoding or "utf-8"
 
             if not any(t in content_type for t in ("html", "xml", "text")):
-                print(f"[skip] Non-text content-type at {url}: {content_type}")
+                logger.info("non_text_content_type", url=url, content_type=content_type)
                 return empty
 
             soup = BeautifulSoup(response.text, "html.parser", from_encoding=encoding)
@@ -188,23 +191,35 @@ async def parse_url(
         except httpx.HTTPStatusError as e:
             status = e.response.status_code
             if status != 429 and 400 <= status < 500:
-                print(f"[{status}] Client error for {url} — not retrying.")
+                logger.warning("client_error_no_retry", url=url, status=status)
                 break
             last_error = e
-            print(f"[{status}] Attempt {attempt}/{max_retries} failed for {url}.")
+            logger.warning(
+                "retry_attempt",
+                url=url,
+                attempt=attempt,
+                max_retries=max_retries,
+                status=status,
+            )
 
         except (httpx.TimeoutException, httpx.ConnectError) as e:
             last_error = e
-            print(f"[network] Attempt {attempt}/{max_retries} failed for {url}: {e}")
+            logger.warning(
+                "network_retry",
+                url=url,
+                attempt=attempt,
+                max_retries=max_retries,
+                error=str(e),
+            )
 
         except Exception as e:
             last_error = e
-            print(f"[error] Unexpected error scraping {url}: {e}")
+            logger.error("unexpected_scrape_error", url=url, error=str(e))
             break
 
         if attempt < max_retries:
             delay = retry_delay * (2 ** (attempt - 1)) + random.uniform(0, 0.5)
             await asyncio.sleep(delay)
 
-    print(f"[failed] Gave up on {url}. Last error: {last_error}")
+    logger.warning("scrape_gave_up", url=url, last_error=str(last_error))
     return empty

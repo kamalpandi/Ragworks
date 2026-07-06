@@ -1,7 +1,7 @@
 import asyncio
 import json
 import os
-from typing import AsyncIterator
+from typing import TYPE_CHECKING, AsyncIterator
 
 import httpx
 from langchain_community.llms.llamacpp import LlamaCpp
@@ -9,6 +9,32 @@ from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHan
 
 from app.components.llms.base import BaseLLMProvider, LLMResponse
 from app.core.config import settings
+from app.observability.logger import get_logger
+
+if TYPE_CHECKING:
+    from app.services.llm_queue import LLMRequestQueue
+
+logger = get_logger(__name__)
+
+_llm_queue: "LLMRequestQueue | None" = None
+_lock: asyncio.Lock | None = None
+
+
+def _get_lock() -> asyncio.Lock:
+    global _lock
+    if _lock is None:
+        _lock = asyncio.Lock()
+    return _lock
+
+
+async def _get_queue():
+    global _llm_queue
+    if _llm_queue is None:
+        from app.services.llm_queue import LLMRequestQueue
+
+        _llm_queue = LLMRequestQueue()
+        await _llm_queue.start()
+    return _llm_queue
 
 
 class LlamaCppProvider(BaseLLMProvider):
@@ -26,20 +52,17 @@ class LlamaCppProvider(BaseLLMProvider):
 
         if self.remote_url:
             self.remote_url = self.remote_url.rstrip("/")
-            print(
-                f"[LlamaCppProvider] Remote URL found: {self.remote_url}. Testing connection..."
-            )
+            logger.info("remote_url_found", url=self.remote_url)
 
             if self._check_connection():
-                print(" ↳ Connection successful! Skipping local RAM allocation.")
+                logger.info("remote_connection_success")
                 self._llm = None
             else:
-                print(" ↳ Connection failed! Remote server is down or unreachable.")
-                print(" ↳ Falling back: Loading local model into RAM...")
+                logger.warning("remote_connection_failed_fallback")
                 self.remote_url = None
                 self._init_local_llm()
         else:
-            print("[LlamaCppProvider] No remote URL configured.")
+            logger.info("no_remote_url_configured")
             self._init_local_llm()
 
     def _init_local_llm(self):
@@ -49,7 +72,7 @@ class LlamaCppProvider(BaseLLMProvider):
                 f"local model file does not exist at path: '{settings.LOCAL_MODEL}'"
             )
 
-        print(f"Loading local model into RAM: {settings.LOCAL_MODEL}")
+        logger.info("loading_local_model", model=settings.LOCAL_MODEL)
 
         n_ctx = getattr(settings, "LLM_N_CTX", 4000)
         top_p = getattr(settings, "LLM_TOP_P", 0.9)
@@ -121,8 +144,10 @@ class LlamaCppProvider(BaseLLMProvider):
                     except Exception:
                         server_error_text = f" | Details: {e.response.text}"
 
-                    print(
-                        f"[LlamaCppProvider] Remote API Error: {e}{server_error_text}"
+                    logger.error(
+                        "remote_api_error",
+                        status=e.response.status_code,
+                        error=str(e),
                     )
                     raise RuntimeError(
                         f"Remote LLM Server returned error status {e.response.status_code}.{server_error_text}"
@@ -132,11 +157,16 @@ class LlamaCppProvider(BaseLLMProvider):
         if self._llm is None:
             raise RuntimeError("LlamaCpp local engine was not initialized.")
 
+        queue = await _get_queue()
         loop = asyncio.get_event_loop()
-        content = await loop.run_in_executor(
-            None,
-            lambda: self._llm.invoke(full_prompt),
-        )
+
+        async def _invoke():
+            return await loop.run_in_executor(
+                None,
+                lambda: self._llm.invoke(full_prompt),
+            )
+
+        content = await queue.submit(_invoke)
 
         if not content:
             raise ValueError("LlamaCpp returned an empty response.")
@@ -175,24 +205,24 @@ class LlamaCppProvider(BaseLLMProvider):
         if self._llm is None:
             raise RuntimeError("LlamaCpp local engine was not initialized.")
 
-        # 1. Capture the engine in a local variable to satisfy the type checker's narrow scope
         local_llm = self._llm
+        lock = _get_lock()
 
-        loop = asyncio.get_event_loop()
-        queue: asyncio.Queue[str | None] = asyncio.Queue()
+        async with lock:
+            loop = asyncio.get_event_loop()
+            result_queue: asyncio.Queue[str | None] = asyncio.Queue()
 
-        def _stream_to_queue():
-            try:
-                # 2. Reference the guaranteed local variable instead of self._llm
-                for chunk in local_llm.stream(full_prompt):
-                    loop.call_soon_threadsafe(queue.put_nowait, chunk)
-            finally:
-                loop.call_soon_threadsafe(queue.put_nowait, None)
+            def _stream_to_queue():
+                try:
+                    for chunk in local_llm.stream(full_prompt):
+                        loop.call_soon_threadsafe(result_queue.put_nowait, chunk)
+                finally:
+                    loop.call_soon_threadsafe(result_queue.put_nowait, None)
 
-        loop.run_in_executor(None, _stream_to_queue)
+            loop.run_in_executor(None, _stream_to_queue)
 
-        while True:
-            chunk = await queue.get()
-            if chunk is None:
-                break
-            yield chunk
+            while True:
+                chunk = await result_queue.get()
+                if chunk is None:
+                    break
+                yield chunk

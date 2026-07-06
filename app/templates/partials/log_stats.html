@@ -1,0 +1,23 @@
+<article>
+  <header>Log Statistics</header>
+  {% if stats.enabled %}
+  <table class="striped">
+    <tbody>
+      <tr>
+        <td><strong>Total Entries</strong></td>
+        <td>{{ stats.total_entries }}</td>
+      </tr>
+      {% for level, count in stats.levels.items() %}
+      <tr>
+        <td><strong>{{ level }}</strong></td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>
+    <em>Log storage is not enabled. Set OBSERVABILITY_ENABLED=true in .env</em>
+  </p>
+  {% endif %}
+</article>

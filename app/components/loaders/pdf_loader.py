@@ -4,23 +4,21 @@ import pdfplumber
 from fastapi import UploadFile
 
 from app.components.loaders.strategies.router import PDFPageRouter
+from app.observability.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 async def parse_pdf(file: UploadFile) -> str:
-    """
-    Parses a PDF file by analyzing each page individually and applying
-    the best strategy (Text, Table, or OCR).
-    """
     content = await file.read()
     pdf_stream = io.BytesIO(content)
 
     router = PDFPageRouter()
     full_text = []
 
-    # Open the PDF once
     with pdfplumber.open(pdf_stream) as pdf:
         total_pages = len(pdf.pages)
-        print(f"Processing PDF: {file.filename} ({total_pages} pages)")
+        logger.info("processing_pdf", filename=file.filename, pages=total_pages)
 
         for i, page in enumerate(pdf.pages):
             # 1. Decide Strategy for THIS page

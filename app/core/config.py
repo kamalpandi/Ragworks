@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     # Hardware Allocation
     LLM_N_GPU_LAYERS: int = -1  # -1 offloads all layers to Apple Silicon / CUDA
 
+    # LLM Concurrency (local providers)
+    LLM_QUEUE_TIMEOUT_SECONDS: float = 120.0
+
+    # Conversation Memory
+    CONVERSATION_HISTORY_LENGTH: int = 10
+
     # ==========================================
     # 4. Embeddings & Vector Space Data
     # ==========================================
@@ -65,7 +71,38 @@ class Settings(BaseSettings):
     CHUNKING_STRATEGY: Literal["paragraph", "recursive", "semantic"] = "recursive"
     ENABLE_TABLE_PARSING: bool = True
     TOP_K: int = 10
+    RETRIEVAL_TOP_K: int = 10
     BATCH_SIZE: int = 32
+
+    # ==========================================
+    # 5b. Reranker
+    # ==========================================
+    RERANKER_ENABLED: bool = True
+    RERANKER_PROVIDER: Literal["flashrank", "bge", "cohere"] = "flashrank"
+    RERANK_TOP_K: int = 3
+    FLASHRANK_MODEL: str = "ms-marco-MiniLM-L-12-v2"
+    BGE_RERANKER_MODEL: str = "BAAI/bge-reranker-v2-m3"
+
+    # ==========================================
+    # 5c. Observability & Tracing
+    # ==========================================
+    OBSERVABILITY_ENABLED: bool = True
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+    LOG_FORMAT: Literal["json", "console"] = "console"
+    OTEL_EXPORTER_TYPE: Literal["otlp", "console", "none"] = "console"
+    OTEL_EXPORTER_ENDPOINT: str = "http://localhost:4317"
+
+    # ==========================================
+    # 5d. Evaluation
+    # ==========================================
+    EVAL_ENABLED: bool = True
+    EVAL_METRICS: List[str] = [
+        "context_precision",
+        "context_recall",
+        "faithfulness",
+        "answer_relevancy",
+    ]
+    EVAL_RESULTS_DIR: str = "eval_results"
 
     # ==========================================
     # 6. Database & Credentials Ecosystem
@@ -74,6 +111,29 @@ class Settings(BaseSettings):
     PINECONE_INDEX_NAME: str = "semantic-search-openai"
     CLOUD: str = "aws"
     REGION: str = "us-east-1"
+
+    # Connection Pooling
+    DB_POOL_MIN_SIZE: int = 2
+    DB_POOL_MAX_SIZE: int = 10
+    DB_POOL_TIMEOUT: float = 30.0
+
+    # ==========================================
+    # 8. Authentication & Security
+    # ==========================================
+    AUTH_ENABLED: bool = True
+    AUTH_EXEMPT_PATHS: str = "/metrics,/docs,/openapi.json,/health,/login"
+    ADMIN_API_KEY: str = os.getenv("ADMIN_API_KEY", "admin-change-me")
+
+    # ==========================================
+    # 9. Rate Limiting
+    # ==========================================
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_QUERIES_PER_MINUTE: int = 60
+    RATE_LIMIT_INGEST_PER_MINUTE: int = 10
+    RATE_LIMIT_BURST_SIZE: int = 5
+
+    # CORS
+    CORS_ALLOWED_ORIGINS: str = os.getenv("CORS_ALLOWED_ORIGINS", "*")
 
     # API Keys (Keep isolated at the bottom)
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")

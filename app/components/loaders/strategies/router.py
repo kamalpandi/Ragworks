@@ -1,10 +1,13 @@
 import pdfplumber.page
 
 from app.core.config import settings
+from app.observability.logger import get_logger
 
 from .base import PageStrategy
 from .table import TableStrategy
 from .text import TextStrategy
+
+logger = get_logger(__name__)
 
 
 class PDFPageRouter:
@@ -54,9 +57,11 @@ class PDFPageRouter:
 
         table_coverage_ratio = total_table_area / total_page_area
 
-        # DEBUG: Print stats to help tune thresholds
-        print(
-            f"Page {page.page_number}: Coverage={table_coverage_ratio:.2f}, Valid Tables={significant_tables}"
+        logger.debug(
+            "page_table_analysis",
+            page=page.page_number,
+            coverage=round(table_coverage_ratio, 2),
+            valid_tables=significant_tables,
         )
 
         # 3. Decision Logic

@@ -1,0 +1,42 @@
+{% if entries %}
+<table class="striped">
+  <thead>
+    <tr>
+      <th style="width: 150px">Timestamp</th>
+      <th style="width: 70px">Level</th>
+      <th style="width: 150px">Event</th>
+      <th>Message</th>
+      <th style="width: 80px">Trace ID</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in entries %}
+    <tr>
+      <td><small>{{ entry.timestamp[:19] }}</small></td>
+      <td>
+        {% if entry.level == "ERROR" %}
+        <mark style="background: var(--pico-del-color)">{{ entry.level }}</mark>
+        {% elif entry.level == "WARNING" %}
+        <mark style="background: var(--pico-contrast)">{{ entry.level }}</mark>
+        {% else %}
+        <mark>{{ entry.level }}</mark>
+        {% endif %}
+      </td>
+      <td><strong>{{ entry.event }}</strong></td>
+      <td>
+        <small>{{ entry.message or entry.event }}</small>
+        {% if entry.extra %}
+        <details>
+          <summary>Details</summary>
+          <pre style="font-size: 0.75rem; max-height: 200px; overflow: auto"><code>{{ entry.extra | tojson(indent=2) }}</code></pre>
+        </details>
+        {% endif %}
+      </td>
+      <td><small>{{ entry.trace_id[:8] if entry.trace_id else "-" }}</small></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p><em>No log entries found.</em></p>
+{% endif %}

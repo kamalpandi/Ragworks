@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse
 from app.components.query_translation.enricher import enrich_query
 from app.core.dependencies import get_rag_engine, get_vector_db
 from app.core.prompt_loader import get_available_prompts, load_prompt
+from app.services.conversation_service import list_threads
 from app.ui import templates
 
 router = APIRouter()
@@ -16,7 +17,9 @@ router = APIRouter()
 async def query_page(request: Request, vector_db=Depends(get_vector_db)):
     """Renders the main Chat/Query layout shell with dynamic prompts"""
     available_prompts = get_available_prompts(category="system")
-    available_files = await vector_db.get_distinct_sources()
+    tenant_id = getattr(request.state, "tenant_id", "default")
+    available_files = await vector_db.get_distinct_sources(tenant_id=tenant_id)
+    threads = await list_threads(tenant_id=tenant_id)
 
     return templates.TemplateResponse(
         request=request,
@@ -24,6 +27,7 @@ async def query_page(request: Request, vector_db=Depends(get_vector_db)):
         context={
             "available_prompts": available_prompts,
             "available_files": available_files,
+            "threads": threads,
         },
     )
 
@@ -32,9 +36,10 @@ async def query_page(request: Request, vector_db=Depends(get_vector_db)):
 async def ui_chat(
     request: Request,
     message: str = Form(...),
-    file_name: str = Form(...),
+    file_name: Optional[str] = Form(None),
     translation_strategy: Optional[str] = Form(None),
     prompt_name: Optional[str] = Form(None),
+    thread_id: Optional[str] = Form(None),
     engine=Depends(get_rag_engine),
     custom_prompt: Optional[str] = Form(None),
 ):
@@ -55,17 +60,18 @@ async def ui_chat(
     else:
         system_report = None
 
-    if not file_name.strip():
-        return "<article style='background-color: var(--pico-form-element-invalid-active-border-color); color: white;'>A valid target 'file_name' must be explicitly provided.</article>"
+    resolved_file = file_name.strip() if file_name and file_name.strip() else None
 
-    enriched_query = enrich_query(message, file_name)
+    enriched_query = enrich_query(message, file_name or "")
 
     try:
         result = await engine.answer_question(
             query=enriched_query,
-            file_filter=file_name,
+            file_filter=resolved_file,
             translation_strategy=strategy,
             system_prompt=system_report,
+            tenant_id=getattr(request.state, "tenant_id", "default"),
+            thread_id=thread_id if thread_id and thread_id.strip() else None,
         )
 
         html_answer = markdown.markdown(result["answer"])

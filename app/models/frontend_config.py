@@ -34,7 +34,24 @@ class FrontendConfig(BaseModel):
     CHUNKING_STRATEGY: Literal["paragraph", "recursive", "semantic"]
     ENABLE_TABLE_PARSING: bool
     TOP_K: int
+    RETRIEVAL_TOP_K: int
     INDEX_NAME: str
     CLOUD: str
     REGION: str
     BATCH_SIZE: int
+
+    # Reranker
+    RERANKER_ENABLED: bool
+    RERANKER_PROVIDER: Literal["flashrank", "bge", "cohere"]
+    RERANK_TOP_K: int
+
+    # Observability
+    OBSERVABILITY_ENABLED: bool
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+    LOG_FORMAT: Literal["json", "console"]
+    OTEL_EXPORTER_TYPE: Literal["otlp", "console", "none"]
+
+    # Evaluation
+    EVAL_ENABLED: bool
+    EVAL_METRICS: List[str]
+    EVAL_RESULTS_DIR: str

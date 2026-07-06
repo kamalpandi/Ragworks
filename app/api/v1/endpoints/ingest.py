@@ -4,6 +4,7 @@ from fastapi import (
     Depends,
     File,
     HTTPException,
+    Request,
     UploadFile,
     status,
 )
@@ -19,6 +20,7 @@ router = APIRouter()
 
 @router.post("/file", response_model=IngestResponse, summary="Ingest a PDF or TXT file")
 async def ingest_file(
+    request: Request,
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     service=Depends(get_ingestion_service),
@@ -44,10 +46,13 @@ async def ingest_file(
     else:
         return {"error": "Unsupported file type. Use .pdf or .txt"}
 
+    tenant_id = getattr(request.state, "tenant_id", "default")
+
     background_tasks.add_task(
         service.ingest_texts,
         texts=[text],
         source_name=file.filename,
+        tenant_id=tenant_id,
     )
 
     return IngestResponse(
@@ -58,24 +63,28 @@ async def ingest_file(
 
 @router.post("/url", response_model=IngestResponse, summary="Ingest content from a URL")
 async def ingest_url(
+    request: Request,
     background_tasks: BackgroundTasks,
-    request: UrlIngestRequest,
+    ingest_request: UrlIngestRequest,
     service=Depends(get_ingestion_service),
 ):
-    result = await parse_url(request.url, respect_robots=False)
+    result = await parse_url(ingest_request.url, respect_robots=False)
 
     if not result.text:
         raise HTTPException(status_code=400, detail="Could not extract text from URL")
 
+    tenant_id = getattr(request.state, "tenant_id", "default")
+
     background_tasks.add_task(
         service.ingest_texts,
         texts=[result.text],
-        source_name=request.url,
+        source_name=ingest_request.url,
+        tenant_id=tenant_id,
     )
 
     return IngestResponse(
-        url=result.url or request.url,
-        filename=request.url,
+        url=result.url or ingest_request.url,
+        filename=ingest_request.url,
         status="Processing started in background",
         count=None,
     )
@@ -85,14 +94,20 @@ async def ingest_url(
     "/custom", response_model=IngestResponse, summary="Ingest custom text strings"
 )
 async def ingest_custom_text(
-    request: IngestRequest, service=Depends(get_ingestion_service)
+    request: Request,
+    ingest_request: IngestRequest,
+    service=Depends(get_ingestion_service),
 ):
     """Ingest any list of strings directly as JSON."""
-    await service.ingest_texts(request.texts, source_name="manual_upload")
-    return IngestResponse(status="success", count=len(request.texts))
+    tenant_id = getattr(request.state, "tenant_id", "default")
+    await service.ingest_texts(
+        ingest_request.texts, source_name="manual_upload", tenant_id=tenant_id
+    )
+    return IngestResponse(status="success", count=len(ingest_request.texts))
 
 
 @router.get("/files", summary="List all ingested document source names")
-async def list_ingested_files(vector_db=Depends(get_vector_db)):
-    sources = await vector_db.get_distinct_sources()
+async def list_ingested_files(request: Request, vector_db=Depends(get_vector_db)):
+    tenant_id = getattr(request.state, "tenant_id", "default")
+    sources = await vector_db.get_distinct_sources(tenant_id=tenant_id)
     return {"sources": sources, "count": len(sources)}

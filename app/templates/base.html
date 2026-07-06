@@ -21,7 +21,10 @@
           <li><a href="/config">Configuration</a></li>
           <li><a href="/ingest">Ingestion</a></li>
           <li><a href="/query">Chat / Query</a></li>
+          <li><a href="/logs">Logs</a></li>
+          <li><a href="/eval">Evaluation</a></li>
           <li><a href="/prompts">Prompts</a></li>
+          <li><a href="#" id="logout-link" style="display: none;" onclick="logout()">Logout</a></li>
         </ul>
       </nav>
 
@@ -29,5 +32,46 @@
 
       {% block content %}{% endblock %}
     </main>
+
+    <script>
+      function getApiKey() {
+        var stored = localStorage.getItem("rag_api_key");
+        if (stored) return stored;
+        var match = document.cookie.match(/(?:^|;\s*)rag_api_key=([^;]*)/);
+        if (match) {
+          var key = decodeURIComponent(match[1]);
+          localStorage.setItem("rag_api_key", key);
+          return key;
+        }
+        return null;
+      }
+
+      function isLoggedIn() {
+        return !!getApiKey();
+      }
+
+      function logout() {
+        localStorage.removeItem("rag_api_key");
+        localStorage.removeItem("rag_tenant_id");
+        document.cookie = "rag_api_key=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        window.location.href = "/login";
+      }
+
+      function updateLogoutLink() {
+        var link = document.getElementById("logout-link");
+        if (link) {
+          link.style.display = isLoggedIn() ? "inline" : "none";
+        }
+      }
+
+      document.addEventListener("htmx:configRequest", function (event) {
+        var apiKey = getApiKey();
+        if (apiKey) {
+          event.detail.headers["X-API-Key"] = apiKey;
+        }
+      });
+
+      updateLogoutLink();
+    </script>
   </body>
 </html>

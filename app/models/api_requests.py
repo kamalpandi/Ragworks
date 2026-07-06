@@ -16,9 +16,9 @@ class UrlIngestRequest(BaseModel):
 class ChatRequest(BaseModel):
     message: str = Field(..., description="User question or message")
 
-    file_name: str = Field(
-        ...,
-        description="The EXACT file name to search within. Strictly required for query isolation.",
+    file_name: Optional[str] = Field(
+        None,
+        description="Optional file name to filter search. Query isolation is now tenant-based.",
     )
 
     translation_strategy: Optional[QueryTranslationStrategyType] = Field(
@@ -29,4 +29,8 @@ class ChatRequest(BaseModel):
     )
     custom_prompt: Optional[str] = Field(
         None, description="Custom system prompt text. Overrides prompt_name if set."
+    )
+    thread_id: Optional[str] = Field(
+        None,
+        description="Conversation thread ID for follow-up questions. Created automatically if not provided.",
     )

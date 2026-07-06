@@ -41,6 +41,7 @@ def get_custom_form(request: Request):
 # --- HTMX Form Handlers ---
 @router.post("/ui/ingest/file", response_class=HTMLResponse)
 async def ui_ingest_file(
+    request: Request,
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     service=Depends(get_ingestion_service),
@@ -59,14 +60,20 @@ async def ui_ingest_file(
             "<span style='color: var(--pico-del-color);'>Unsupported file type.</span>"
         )
 
+    tenant_id = getattr(request.state, "tenant_id", "default")
+
     background_tasks.add_task(
-        service.ingest_texts, texts=[text], source_name=file.filename
+        service.ingest_texts,
+        texts=[text],
+        source_name=file.filename,
+        tenant_id=tenant_id,
     )
     return f"<span style='color: var(--pico-ins-color);'>'{file.filename}' queued for background processing!</span>"
 
 
 @router.post("/ui/ingest/url", response_class=HTMLResponse)
 async def ui_ingest_url(
+    request: Request,
     background_tasks: BackgroundTasks,
     url: str = Form(...),
     service=Depends(get_ingestion_service),
@@ -75,15 +82,20 @@ async def ui_ingest_url(
     if not result.text:
         return "<span style='color: var(--pico-del-color);'>Could not extract text from URL.</span>"
 
+    tenant_id = getattr(request.state, "tenant_id", "default")
+
     background_tasks.add_task(
-        service.ingest_texts, texts=[result.text], source_name=url
+        service.ingest_texts, texts=[result.text], source_name=url, tenant_id=tenant_id
     )
     return f"<span style='color: var(--pico-ins-color);'>URL extraction for '{url}' started!</span>"
 
 
 @router.post("/ui/ingest/custom", response_class=HTMLResponse)
 async def ui_ingest_custom(
-    text: str = Form(...), service=Depends(get_ingestion_service)
+    request: Request,
+    text: str = Form(...),
+    service=Depends(get_ingestion_service),
 ):
-    await service.ingest_texts([text], source_name="manual_upload")
+    tenant_id = getattr(request.state, "tenant_id", "default")
+    await service.ingest_texts([text], source_name="manual_upload", tenant_id=tenant_id)
     return "<span style='color: var(--pico-ins-color);'>Custom text successfully ingested!</span>"

@@ -52,7 +52,7 @@
       <article>
         <header><strong>Query Settings</strong></header>
         <div style="margin-bottom: 1rem">
-          <label for="file_name">Target Document (Required)</label>
+          <label for="file_name">Target Document (Optional)</label>
           <input
             type="text"
             id="file_name"
@@ -61,14 +61,27 @@
             placeholder="e.g., manual.pdf"
             list="file-suggestions"
             autocomplete="off"
-            required
           />
           <datalist id="file-suggestions">
             {% for file in available_files %}
             <option value="{{ file }}"></option>
             {% endfor %}
           </datalist>
-          <small>Queries are strictly isolated to this file.</small>
+          <small>Leave empty to search across all documents in your knowledge base.</small>
+        </div>
+
+        <div style="margin-bottom: 1rem">
+          <label for="thread_selector">Conversation Thread</label>
+          <select
+            id="thread_selector"
+            name="thread_selector"
+          >
+            <option value="__new__" selected>New Thread</option>
+            {% for thread in threads %}
+            <option value="{{ thread }}">{{ thread }}</option>
+            {% endfor %}
+          </select>
+          <small>Select an existing conversation or start a new one.</small>
         </div>
 
         <div style="margin-bottom: 1rem">
@@ -121,6 +134,7 @@
         hx-swap="beforeend"
         hx-indicator="#loading-spinner"
       >
+        <input type="hidden" id="thread_id" name="thread_id" value="" />
         <label for="message"><strong>Your Question</strong></label>
         <textarea
           id="message"
@@ -158,6 +172,31 @@
 </main>
 
 <script>
+  function generateUUID() {
+    return crypto.randomUUID();
+  }
+
+  function initThreadId() {
+    var hidden = document.getElementById("thread_id");
+    if (!hidden.value) {
+      hidden.value = generateUUID();
+    }
+  }
+
+  function updateThreadId() {
+    var selector = document.getElementById("thread_selector");
+    var hidden = document.getElementById("thread_id");
+    if (selector.value === "__new__") {
+      hidden.value = generateUUID();
+    } else {
+      hidden.value = selector.value;
+    }
+  }
+
+  initThreadId();
+
+  document.getElementById("thread_selector").addEventListener("change", updateThreadId);
+
   document
     .getElementById("message")
     .addEventListener("keydown", function (e) {
@@ -169,7 +208,7 @@
 
   document.body.addEventListener("htmx:afterSwap", function (e) {
     if (e.detail.target.id === "conversation-thread") {
-      const container = document.getElementById("conversation-thread");
+      var container = document.getElementById("conversation-thread");
       container.scrollTop = container.scrollHeight;
     }
   });

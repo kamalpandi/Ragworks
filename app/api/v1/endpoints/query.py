@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.components.query_translation.enricher import enrich_query
 from app.core.dependencies import get_rag_engine, load_prompt
@@ -13,25 +13,19 @@ router = APIRouter()
     response_model=QueryResponse,
     summary="Query a specific file in the RAG knowledge base",
 )
-async def query_knowledge_base(request: ChatRequest, engine=Depends(get_rag_engine)):
+async def query_knowledge_base(
+    request: ChatRequest, request_ctx: Request, engine=Depends(get_rag_engine)
+):
     """
-    Search and Answer isolated strictly to an explicit file.
+    Search and Answer isolated to the requesting tenant.
 
     - **message**: Your question
-    - **file_name**: MANDATORY target file. Other documents will not be touched.
+    - **file_name**: Optional target file to filter search within tenant scope
     - **translation_strategy**: Optional strategy (multi_query, hyde, etc.)
     - **prompt_name**: Optional custom system prompt name
     - **custom_prompt**: Optional inline custom system prompt text (overrides prompt_name)
+    - **thread_id**: Optional conversation thread for follow-up questions
     """
-    if not request.file_name.strip():
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={
-                "error_code": "VALIDATION_ERROR",
-                "message": "A valid target 'file_name' must be explicitly provided to ensure query isolation.",
-            },
-        )
-
     if request.custom_prompt and request.custom_prompt.strip():
         system_report = request.custom_prompt.strip()
     elif request.prompt_name:
@@ -46,6 +40,8 @@ async def query_knowledge_base(request: ChatRequest, engine=Depends(get_rag_engi
             file_filter=request.file_name,
             translation_strategy=request.translation_strategy,
             system_prompt=system_report,
+            tenant_id=getattr(request_ctx.state, "tenant_id", "default"),
+            thread_id=request.thread_id,
         )
         return result
     except RuntimeError as e:
