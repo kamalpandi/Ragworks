@@ -1,0 +1,64 @@
+<div id="eval-compare">
+  <form
+    hx-get="/ui/eval/compare"
+    hx-target="#eval-compare"
+    hx-swap="outerHTML"
+  >
+    <div style="display: flex; gap: 1rem; align-items: end; margin-bottom: 1rem;">
+      <label>
+        Run A
+        <select name="id_a">
+          <option value="">-- Select --</option>
+          {% for r in results %}
+          <option value="{{ r.id }}" {% if id_a == r.id %}selected{% endif %}>
+            {{ r.dataset_name }} ({{ r.timestamp[:10] }})
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Run B
+        <select name="id_b">
+          <option value="">-- Select --</option>
+          {% for r in results %}
+          <option value="{{ r.id }}" {% if id_b == r.id %}selected{% endif %}>
+            {{ r.dataset_name }} ({{ r.timestamp[:10] }})
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">Compare</button>
+    </div>
+  </form>
+
+  {% if comparison %}
+  <table>
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Run A</th>
+        <th>Run B</th>
+        <th>Delta</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for name, vals in comparison.items() %}
+      <tr>
+        <td>{{ name.replace('_', ' ') | title }}</td>
+        <td>{{ "%.4f"|format(vals.a) }}</td>
+        <td>{{ "%.4f"|format(vals.b) }}</td>
+        <td>
+          {% set delta = vals.delta %}
+          <strong style="color: {% if delta > 0 %}var(--pico-ins-color){% elif delta < 0 %}var(--pico-del-color){% else %}inherit{% endif %};">
+            {{ "%+.4f"|format(delta) }}
+            {% if delta > 0 %}▲{% elif delta < 0 %}▼{% endif %}
+          </strong>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% elif id_a and id_b %}
+  <p style="color: var(--pico-del-color);">Could not compare these results. Ensure both IDs are valid.</p>
+  {% endif %}
+</div>

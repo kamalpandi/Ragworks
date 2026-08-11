@@ -16,7 +16,12 @@
 
   <article>
     <header>Run Evaluation from HuggingFace Dataset</header>
-    <form action="/api/v1/eval/run" method="post" target="_blank">
+    <form
+      hx-post="/api/v1/eval/run"
+      hx-target="#eval-run-area"
+      hx-swap="innerHTML"
+      hx-indicator="#eval-run-spinner"
+    >
       <div style="display: flex; gap: 1rem; align-items: end">
         <label>
           Dataset Name
@@ -41,10 +46,11 @@
   <article>
     <header>Run Evaluation from File</header>
     <form
-      action="/api/v1/eval/run/file"
-      method="post"
-      enctype="multipart/form-data"
-      target="_blank"
+      hx-post="/api/v1/eval/run/file"
+      hx-target="#eval-run-area"
+      hx-swap="innerHTML"
+      hx-encoding="multipart/form-data"
+      hx-indicator="#eval-run-spinner"
     >
       <div style="display: flex; gap: 1rem; align-items: end">
         <label>
@@ -58,6 +64,27 @@
         <button type="submit">Upload & Run</button>
       </div>
     </form>
+  </article>
+
+  <div id="eval-run-spinner" style="display: none; text-align: center; padding: 1rem;">
+    <span aria-busy="true">Starting evaluation...</span>
+  </div>
+
+  <div id="eval-run-area"></div>
+
+  <article>
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <span>Compare Runs</span>
+      </div>
+    </header>
+    <div
+      hx-get="/ui/eval/compare"
+      hx-trigger="load"
+      hx-swap="innerHTML"
+    >
+      <p>Loading compare...</p>
+    </div>
   </article>
 
   <article>

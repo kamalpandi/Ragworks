@@ -1,0 +1,27 @@
+<div class="grid" style="margin-bottom: 0.5rem;">
+  <article style="margin: 0; padding: 1rem;">
+    <small style="color: var(--pico-muted-color);">App</small>
+    <p style="margin: 0.25rem 0; font-size: 1.1rem; font-weight: bold; color: var(--pico-ins-color);">RUNNING</p>
+    <small>{{ app_host }}:{{ app_port }}</small>
+  </article>
+
+  <article style="margin: 0; padding: 1rem;">
+    <small style="color: var(--pico-muted-color);">Database</small>
+    <p style="margin: 0.25rem 0; font-size: 1.1rem; font-weight: bold; color: {{ db_status_color }};">{{ db_status | upper }}</p>
+    <small>{{ vector_provider }}</small>
+  </article>
+
+  <article style="margin: 0; padding: 1rem;">
+    <small style="color: var(--pico-muted-color);">LLM</small>
+    <p style="margin: 0.25rem 0; font-size: 1.1rem; font-weight: bold;">{{ llm_provider | title }}</p>
+    <small>{{ llm_model }}</small>
+  </article>
+
+  <article style="margin: 0; padding: 1rem;">
+    <small style="color: var(--pico-muted-color);">Ingested</small>
+    <p style="margin: 0.25rem 0; font-size: 1.1rem; font-weight: bold;">{{ doc_count }}</p>
+    <small>chunks / {{ key_count }} API keys</small>
+  </article>
+</div>
+
+<small style="color: var(--pico-muted-color);">Updated: {{ updated }}</small>

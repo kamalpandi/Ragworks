@@ -1,0 +1,15 @@
+<article style="margin: 0; padding: 1rem;">
+  <header>
+    <strong>Ingested Documents</strong>
+    <small style="color: var(--pico-muted-color); margin-left: 0.5rem;">({{ count }})</small>
+  </header>
+  {% if sources %}
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+    {% for src in sources %}
+    <kbd style="font-size: 0.8rem;">{{ src }}</kbd>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p><small style="color: var(--pico-muted-color);">No documents ingested yet</small></p>
+  {% endif %}
+</article>

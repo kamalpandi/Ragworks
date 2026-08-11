@@ -1,0 +1,18 @@
+<article style="margin: 0; padding: 1rem;">
+  <header>
+    <strong>Recent Activity</strong>
+  </header>
+  {% if entries %}
+  <table style="margin: 0; font-size: 0.85rem;">
+    {% for e in entries %}
+    <tr>
+      <td style="width: 80px;"><small>{{ e.timestamp[11:19] }}</small></td>
+      <td style="width: 70px;"><span style="{{ e.level_style }}">{{ e.level }}</span></td>
+      <td>{{ e.event }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p><small style="color: var(--pico-muted-color);">No recent activity</small></p>
+  {% endif %}
+</article>

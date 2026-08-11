@@ -72,16 +72,16 @@
 
         <div style="margin-bottom: 1rem">
           <label for="thread_selector">Conversation Thread</label>
-          <select
-            id="thread_selector"
-            name="thread_selector"
-          >
-            <option value="__new__" selected>New Thread</option>
-            {% for thread in threads %}
-            <option value="{{ thread }}">{{ thread }}</option>
+          <select id="thread_selector" name="thread_selector">
+            <option value="__new__" selected>+ New Thread</option>
+            {% for t in threads %}
+            <option value="{{ t.thread_id }}">
+              {% if t.first_message %}"{{ t.first_message }}"{% endif %}
+              — {{ t.message_count }} msg{% if t.message_count != 1 %}s{% endif %}
+            </option>
             {% endfor %}
           </select>
-          <small>Select an existing conversation or start a new one.</small>
+          <small>Select an existing conversation or start a new one. History loads automatically.</small>
         </div>
 
         <div style="margin-bottom: 1rem">
@@ -183,19 +183,27 @@
     }
   }
 
-  function updateThreadId() {
-    var selector = document.getElementById("thread_selector");
-    var hidden = document.getElementById("thread_id");
-    if (selector.value === "__new__") {
-      hidden.value = generateUUID();
-    } else {
-      hidden.value = selector.value;
-    }
-  }
-
   initThreadId();
 
-  document.getElementById("thread_selector").addEventListener("change", updateThreadId);
+  document.getElementById("thread_selector").addEventListener("change", function (e) {
+    var value = e.target.value;
+    var hidden = document.getElementById("thread_id");
+    var container = document.getElementById("conversation-thread");
+
+    if (value === "__new__") {
+      hidden.value = generateUUID();
+      container.innerHTML =
+        '<p style="color: var(--pico-muted-color); text-align: center; padding: 2rem;">Ask a question to start the conversation.</p>';
+    } else {
+      hidden.value = value;
+      container.innerHTML =
+        '<p style="color: var(--pico-muted-color); text-align: center; padding: 2rem;">Loading history...</p>';
+      htmx.ajax("GET", "/ui/query/thread/" + value, {
+        target: "#conversation-thread",
+        swap: "innerHTML",
+      });
+    }
+  });
 
   document
     .getElementById("message")

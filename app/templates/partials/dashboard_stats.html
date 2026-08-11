@@ -1,0 +1,40 @@
+<div class="grid" style="margin-bottom: 0.5rem;">
+  <article style="margin: 0; padding: 1rem;">
+    <header style="margin-bottom: 0.5rem;"><strong>Usage Today</strong> <small style="color: var(--pico-muted-color);">({{ tenant_id }})</small></header>
+    <table style="margin: 0;">
+      <tr><td>Queries</td><td><strong>{{ query_count }}</strong></td></tr>
+      <tr><td>Ingestions</td><td><strong>{{ ingest_count }}</strong></td></tr>
+      <tr><td>Tokens</td><td><strong>{{ total_tokens }}</strong></td></tr>
+      <tr><td>Chunks</td><td><strong>{{ chunks_created }}</strong></td></tr>
+    </table>
+  </article>
+
+  <article style="margin: 0; padding: 1rem;">
+    <header style="margin-bottom: 0.5rem;"><strong>Pipeline</strong></header>
+    <table style="margin: 0;">
+      <tr><td>Chunking</td><td><strong>{{ chunking_strategy }}</strong></td></tr>
+      <tr><td>Top-K</td><td><strong>{{ top_k }} / {{ retrieval_top_k }}</strong></td></tr>
+      <tr><td>Reranker</td><td style="color: {% if reranker_enabled %}var(--pico-ins-color){% else %}var(--pico-muted-color){% endif %}">
+        <strong>{% if reranker_enabled %}{{ reranker_provider }}{% else %}off{% endif %}</strong>
+      </td></tr>
+      <tr><td>Rate Limit</td><td style="color: {% if rate_limit_enabled %}var(--pico-ins-color){% else %}var(--pico-muted-color){% endif %}">
+        <strong>{% if rate_limit_enabled %}on{% else %}off{% endif %}</strong>
+      </td></tr>
+    </table>
+  </article>
+
+  <article style="margin: 0; padding: 1rem;">
+    <header style="margin-bottom: 0.5rem;"><strong>Embedding</strong></header>
+    <table style="margin: 0;">
+      <tr><td>Model</td><td><strong>{{ embedding_model }}</strong></td></tr>
+      <tr><td>Dimension</td><td><strong>{{ embedding_dimension }}</strong></td></tr>
+    </table>
+  </article>
+
+  <article style="margin: 0; padding: 1rem;">
+    <header style="margin-bottom: 0.5rem;"><strong>Prompt</strong></header>
+    <table style="margin: 0;">
+      <tr><td>System</td><td><strong>{{ system_prompt }}</strong></td></tr>
+    </table>
+  </article>
+</div>

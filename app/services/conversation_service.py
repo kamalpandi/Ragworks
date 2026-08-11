@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from psycopg.rows import dict_row
 
@@ -30,7 +29,7 @@ async def get_thread(
     limit = limit or settings.CONVERSATION_HISTORY_LENGTH
     pool = get_pool()
     async with pool.connection() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 "SELECT id, tenant_id, thread_id, role, content, created_at "
                 "FROM conversations "
@@ -56,16 +55,40 @@ async def get_thread(
             )
 
 
-async def list_threads(tenant_id: str) -> List[str]:
+async def list_threads(tenant_id: str) -> list[dict]:
     pool = get_pool()
     async with pool.connection() as conn:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
-                "SELECT DISTINCT thread_id FROM conversations WHERE tenant_id = %s ORDER BY thread_id",
+                """SELECT
+                    thread_id,
+                    (SELECT content FROM conversations c2
+                     WHERE c2.thread_id = c.thread_id AND c2.role = 'user'
+                     ORDER BY created_at ASC LIMIT 1) AS first_message,
+                    COUNT(*) AS message_count,
+                    MAX(created_at) AS last_updated
+                FROM conversations c
+                WHERE tenant_id = %s
+                GROUP BY thread_id
+                ORDER BY last_updated DESC""",
                 [tenant_id],
             )
             rows = await cur.fetchall()
-            return [str(row["thread_id"]) for row in rows]
+            return [
+                {
+                    "thread_id": str(row["thread_id"]),
+                    "first_message": (
+                        str(row["first_message"])[:60] + "..."
+                        if row["first_message"] and len(str(row["first_message"])) > 60
+                        else str(row["first_message"] or "")
+                    ),
+                    "message_count": row["message_count"],
+                    "last_updated": row["last_updated"].isoformat()
+                    if row["last_updated"]
+                    else "",
+                }
+                for row in rows
+            ]
 
 
 def create_thread_id() -> str:

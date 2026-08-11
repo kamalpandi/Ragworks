@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from app.core.config import settings
 from app.evaluation.base import BaseMetric
@@ -8,15 +8,15 @@ from app.evaluation.models import EvalResult, MetricScore
 
 
 class EvaluationRunner:
-    """Orchestrates evaluation: load dataset -> run pipeline -> compute metrics."""
-
     def __init__(
         self,
         rag_engine,
         metric_names: Optional[List[str]] = None,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
     ):
         self.rag_engine = rag_engine
         self.metric_names = metric_names or settings.EVAL_METRICS
+        self.progress_callback = progress_callback
 
     async def run(
         self,
@@ -24,7 +24,6 @@ class EvaluationRunner:
         dataset_name: str = "custom",
         file_filter: Optional[str] = None,
     ) -> EvalResult:
-        """Run evaluation over a list of dataset entries."""
         metrics: List[BaseMetric] = [get_metric(name) for name in self.metric_names]
         all_scores: Dict[str, List[float]] = {m.name: [] for m in metrics}
         total = len(entries)
@@ -54,6 +53,9 @@ class EvaluationRunner:
                     if key not in all_scores:
                         all_scores[key] = []
                     all_scores[key].append(value)
+
+            if self.progress_callback:
+                self.progress_callback(i + 1, total)
 
         # Aggregate
         metric_scores = []

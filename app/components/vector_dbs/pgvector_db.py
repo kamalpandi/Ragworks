@@ -63,7 +63,12 @@ class PGVectorDB(BaseVectorDB):
                 )
             )
 
-    async def upsert(self, chunks: List[DocumentChunk], embeddings: List[List[float]]):
+    async def upsert(
+        self,
+        chunks: List[DocumentChunk],
+        embeddings: List[List[float]],
+        tenant_id: str = "default",
+    ):
         if len(chunks) != len(embeddings):
             raise ValueError("Number of chunks and embeddings must match!")
 
