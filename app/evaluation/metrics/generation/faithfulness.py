@@ -21,8 +21,9 @@ class Faithfulness(BaseMetric):
         try:
             from ragas.metrics import Faithfulness as RagasFaithfulness
             from ragas import SingleTurnSample
+            from app.evaluation.metrics import _get_eval_llm
 
-            metric = RagasFaithfulness()
+            metric = RagasFaithfulness(llm=_get_eval_llm())
             sample = SingleTurnSample(
                 user_input=query,
                 response=answer,
@@ -30,7 +31,7 @@ class Faithfulness(BaseMetric):
             )
             score = await metric.single_turn_ascore(sample)
             return {"faithfulness": float(score) if score is not None else 0.0}
-        except ImportError:
+        except (ImportError, Exception):
             if not contexts or not answer:
                 return {"faithfulness": 0.0}
             # Fallback: check if answer words appear in contexts

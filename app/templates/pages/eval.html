@@ -44,6 +44,40 @@
   </article>
 
   <article>
+    <header>Run Evaluation from Thread</header>
+    <form
+      hx-post="/api/v1/eval/run/thread/{{ threads[0].thread_id if threads else '' }}"
+      hx-target="#eval-run-area"
+      hx-swap="innerHTML"
+      hx-indicator="#eval-run-spinner"
+      id="eval-thread-form"
+    >
+      <div style="display: flex; gap: 1rem; align-items: end">
+        <label>
+          Thread
+          <select name="thread_id" onchange="document.getElementById('eval-thread-form').setAttribute('hx-post', '/api/v1/eval/run/thread/' + this.value)">
+            <option value="">-- Select a thread --</option>
+            {% for t in threads %}
+            <option value="{{ t.thread_id }}">
+              {% if t.first_message %}"{{ t.first_message }}"{% endif %}
+              — {{ t.message_count }} msg{% if t.message_count != 1 %}s{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          Metrics
+          <input name="metric_names" value="faithfulness,context_precision" />
+        </label>
+        <button type="submit">Run From Thread</button>
+      </div>
+    </form>
+    {% if not threads %}
+    <p><small style="color: var(--pico-muted-color);">No conversation threads yet. Ask questions on the Query page first.</small></p>
+    {% endif %}
+  </article>
+
+  <article>
     <header>Run Evaluation from File</header>
     <form
       hx-post="/api/v1/eval/run/file"
@@ -80,7 +114,7 @@
     </header>
     <div
       hx-get="/ui/eval/compare"
-      hx-trigger="load"
+      hx-trigger="load, evalDone from:body"
       hx-swap="innerHTML"
     >
       <p>Loading compare...</p>
@@ -100,7 +134,7 @@
         </button>
       </div>
     </header>
-    <div id="eval-results" hx-get="/ui/eval/results" hx-trigger="load">
+    <div id="eval-results" hx-get="/ui/eval/results" hx-trigger="load, evalDone from:body">
       <p>Loading results...</p>
     </div>
   </article>

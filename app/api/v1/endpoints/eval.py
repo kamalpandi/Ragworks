@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.dependencies import get_rag_engine
 from app.evaluation.dataset import DatasetEntry, DatasetLoader
 from app.evaluation.models import EvalResult
+from app.services.conversation_service import get_thread
 from app.services.rag_engine import RAGEngine
 
 router = APIRouter()
@@ -26,6 +27,9 @@ def _render_result_card(result: EvalResult) -> str:
 <article id="eval-run-result">
   <header>
     <strong>{{ dataset_name }}</strong>
+    {% if thread_label %}
+    <kbd style="margin-left: 0.5rem; font-size: 0.75rem;">thread</kbd>
+    {% endif %}
     <small style="margin-left: 1rem;">{{ num_samples }} samples</small>
     <small style="color: var(--pico-muted-color); margin-left: 0.5rem;">{{ config.llm_model }} / {{ config.chunking_strategy }}</small>
   </header>
@@ -50,6 +54,7 @@ def _render_result_card(result: EvalResult) -> str:
         num_samples=result.num_samples,
         metrics=result.metrics,
         config=result.config_snapshot,
+        thread_label=result.thread_label,
     )
 
 
@@ -160,7 +165,7 @@ async def eval_progress(request: Request, run_id: str):
         result: EvalResult = job["result"]
         card_html = _render_result_card(result)
         if request.headers.get("HX-Request"):
-            return HTMLResponse(card_html)
+            return HTMLResponse(card_html, headers={"HX-Trigger": "evalDone"})
         return result.model_dump()
 
     if job["status"] == "error":
@@ -252,6 +257,94 @@ async def run_evaluation_from_file(
     return result.model_dump()
 
 
+@router.post("/run/thread/{thread_id}")
+async def run_evaluation_from_thread(
+    request: Request,
+    thread_id: str,
+    file_filter: Optional[str] = None,
+    metric_names: Optional[str] = None,
+    rag_engine: RAGEngine = Depends(get_rag_engine),
+):
+    tenant_id = getattr(request.state, "tenant_id", "default")
+    try:
+        thread = await get_thread(tenant_id, thread_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    entries = []
+    for i in range(0, len(thread.messages) - 1, 2):
+        user_msg = thread.messages[i]
+        asst_msg = thread.messages[i + 1] if i + 1 < len(thread.messages) else None
+        if user_msg.role == "user" and asst_msg and asst_msg.role == "assistant":
+            entries.append(
+                DatasetEntry(
+                    query=user_msg.content,
+                    ground_truth=asst_msg.content,
+                )
+            )
+
+    if not entries:
+        raise HTTPException(
+            status_code=400,
+            detail="Thread has no Q&A pairs to evaluate. Ask at least one question in the thread.",
+        )
+
+    first = thread.messages[0].content[:60] + (
+        "..." if len(thread.messages[0].content) > 60 else ""
+    )
+    thread_label = (
+        f'"{first}" — {len(entries)} pairs' if first else f"{len(entries)} pairs"
+    )
+    dataset_label = f"Thread: {thread_label}"
+
+    metrics_list = metric_names.split(",") if metric_names else None
+
+    if request.headers.get("HX-Request"):
+        run_id = uuid.uuid4().hex[:12]
+        _eval_jobs[run_id] = {
+            "status": "starting",
+            "current": 0,
+            "total": len(entries),
+        }
+        asyncio.create_task(
+            _run_eval_background(
+                run_id=run_id,
+                entries=entries,
+                dataset_name=dataset_label,
+                metric_names=metrics_list,
+                file_filter=file_filter,
+                rag_engine=rag_engine,
+            )
+        )
+        from jinja2 import Environment, BaseLoader
+
+        env = Environment(loader=BaseLoader())
+        tmpl = env.from_string("""\
+<div id="eval-run-area" hx-get="/api/v1/eval/progress/{{ run_id }}" hx-trigger="every 2s" hx-swap="outerHTML">
+  <article>
+    <header>Running Evaluation</header>
+    <p>{{ dataset_name }} — {{ total }} samples</p>
+    <progress value="0" max="{{ total }}" style="width: 100%;"></progress>
+    <p><small>Starting...</small></p>
+  </article>
+</div>
+""")
+        return HTMLResponse(
+            tmpl.render(run_id=run_id, dataset_name=dataset_label, total=len(entries))
+        )
+
+    from app.evaluation.runner import EvaluationRunner
+
+    runner = EvaluationRunner(rag_engine=rag_engine, metric_names=metrics_list)
+    result = await runner.run(
+        entries=entries, dataset_name=dataset_label, file_filter=file_filter
+    )
+    result.thread_id = thread_id
+    result.thread_label = thread_label
+    result.store(settings.EVAL_RESULTS_DIR)
+    return result.model_dump()
+
+
 @router.get("/results")
 async def list_results():
     results = EvalResult.list_results(settings.EVAL_RESULTS_DIR)
@@ -262,6 +355,7 @@ async def list_results():
             "dataset_name": r.dataset_name,
             "num_samples": r.num_samples,
             "aggregated_scores": r.aggregated_scores,
+            "thread_label": r.thread_label,
         }
         for r in results
     ]

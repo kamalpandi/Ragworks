@@ -16,6 +16,11 @@ def get_llm_provider() -> BaseLLMProvider:
 
             return OpenAIProvider()
 
+        case "deepseek":
+            from app.components.llms.deepseek_llm import DeepSeekProvider
+
+            return DeepSeekProvider()
+
         case "ollama":
             from app.components.llms.ollama_llm import OllamaProvider
 

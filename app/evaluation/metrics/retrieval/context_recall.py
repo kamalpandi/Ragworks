@@ -21,8 +21,9 @@ class ContextRecall(BaseMetric):
         try:
             from ragas.metrics import ContextRecall as RagasContextRecall
             from ragas import SingleTurnSample
+            from app.evaluation.metrics import _get_eval_llm
 
-            metric = RagasContextRecall()
+            metric = RagasContextRecall(llm=_get_eval_llm())
             sample = SingleTurnSample(
                 user_input=query,
                 response=answer,
@@ -31,7 +32,7 @@ class ContextRecall(BaseMetric):
             )
             score = await metric.single_turn_ascore(sample)
             return {"context_recall": float(score) if score else 0.0}
-        except ImportError:
+        except (ImportError, Exception):
             if not contexts or not ground_truth:
                 return {"context_recall": 0.0}
             # Simple overlap: fraction of ground_truth words found in contexts

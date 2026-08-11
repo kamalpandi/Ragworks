@@ -267,6 +267,7 @@ mkdir -p models
 | Provider   | `.env` setting           | Requirements                |
 |------------|--------------------------|-----------------------------|
 | OpenAI     | `LLM_PROVIDER=openai`    | `OPENAI_API_KEY`            |
+| DeepSeek   | `LLM_PROVIDER=deepseek`  | `DEEPSEEK_API_KEY`          |
 | Ollama     | `LLM_PROVIDER=ollama`    | `ollama serve` on localhost |
 | llama.cpp  | `LLM_PROVIDER=llamacpp`  | GGUF file in `models/` dir  |
 

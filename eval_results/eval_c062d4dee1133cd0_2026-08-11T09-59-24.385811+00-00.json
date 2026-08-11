@@ -1,0 +1,43 @@
+{
+  "id": "c062d4dee1133cd0",
+  "timestamp": "2026-08-11T09:59:24.385811+00:00",
+  "dataset_name": "Thread: \"Explain the key concepts, definitions, and technical details...\" — 2 pairs",
+  "num_samples": 2,
+  "metrics": [
+    {
+      "name": "context_precision",
+      "value": 0.0,
+      "description": "Mean over 2 samples"
+    },
+    {
+      "name": "context_recall",
+      "value": 0.0,
+      "description": "Mean over 2 samples"
+    },
+    {
+      "name": "faithfulness",
+      "value": 0.11538461538461539,
+      "description": "Mean over 2 samples"
+    },
+    {
+      "name": "answer_relevancy",
+      "value": 0.35789473684210527,
+      "description": "Mean over 2 samples"
+    }
+  ],
+  "aggregated_scores": {
+    "context_precision": 0.0,
+    "context_recall": 0.0,
+    "faithfulness": 0.11538461538461539,
+    "answer_relevancy": 0.35789473684210527
+  },
+  "config_snapshot": {
+    "reranker_enabled": true,
+    "reranker_provider": "flashrank",
+    "chunking_strategy": "recursive",
+    "top_k": 10,
+    "llm_model": "gpt-4o-mini"
+  },
+  "thread_id": null,
+  "thread_label": null
+}

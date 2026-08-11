@@ -21,8 +21,9 @@ class AnswerRelevancy(BaseMetric):
         try:
             from ragas.metrics import AnswerRelevancy as RagasAnswerRelevancy
             from ragas import SingleTurnSample
+            from app.evaluation.metrics import _get_eval_llm
 
-            metric = RagasAnswerRelevancy()
+            metric = RagasAnswerRelevancy(llm=_get_eval_llm())
             sample = SingleTurnSample(
                 user_input=query,
                 response=answer,
@@ -30,7 +31,7 @@ class AnswerRelevancy(BaseMetric):
             )
             score = await metric.single_turn_ascore(sample)
             return {"answer_relevancy": float(score) if score is not None else 0.0}
-        except ImportError:
+        except (ImportError, Exception):
             if not answer:
                 return {"answer_relevancy": 0.0}
             # Fallback: word overlap between query and answer

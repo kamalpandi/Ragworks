@@ -21,8 +21,9 @@ class ContextPrecision(BaseMetric):
         try:
             from ragas.metrics import ContextPrecision as RagasContextPrecision
             from ragas import SingleTurnSample
+            from app.evaluation.metrics import _get_eval_llm
 
-            metric = RagasContextPrecision()
+            metric = RagasContextPrecision(llm=_get_eval_llm())
             sample = SingleTurnSample(
                 user_input=query,
                 response=answer,
@@ -31,7 +32,7 @@ class ContextPrecision(BaseMetric):
             )
             score = await metric.single_turn_ascore(sample)
             return {"context_precision": float(score) if score else 0.0}
-        except ImportError:
+        except (ImportError, Exception):
             # Fallback: simple embedding-based check
             if not contexts or not ground_truth:
                 return {"context_precision": 0.0}

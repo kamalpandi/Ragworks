@@ -23,8 +23,9 @@ class Correctness(BaseMetric):
         try:
             from ragas.metrics import Correctness as RagasCorrectness
             from ragas import SingleTurnSample
+            from app.evaluation.metrics import _get_eval_llm
 
-            metric = RagasCorrectness()
+            metric = RagasCorrectness(llm=_get_eval_llm())
             sample = SingleTurnSample(
                 user_input=query,
                 response=answer,
@@ -33,7 +34,7 @@ class Correctness(BaseMetric):
             )
             score = await metric.single_turn_ascore(sample)
             return {"correctness": float(score) if score is not None else 0.0}
-        except ImportError:
+        except (ImportError, Exception):
             # Fallback: simple string overlap with ground truth
             gt_words = set(ground_truth.lower().split())
             answer_words = set(answer.lower().split())

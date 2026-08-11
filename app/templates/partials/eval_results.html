@@ -5,6 +5,7 @@
       <th>ID</th>
       <th>Date</th>
       <th>Dataset</th>
+      <th>Source</th>
       <th>Samples</th>
       <th>Scores</th>
       <th></th>
@@ -16,6 +17,13 @@
       <td><small>{{ r.id }}</small></td>
       <td><small>{{ r.timestamp[:19] }}</small></td>
       <td>{{ r.dataset_name }}</td>
+      <td>
+        {% if r.thread_label %}
+        <kbd style="font-size: 0.7rem;">{{ r.thread_label }}</kbd>
+        {% else %}
+        <small style="color: var(--pico-muted-color);">—</small>
+        {% endif %}
+      </td>
       <td>{{ r.num_samples }}</td>
       <td>
         {% for name, val in r.aggregated_scores.items() %}

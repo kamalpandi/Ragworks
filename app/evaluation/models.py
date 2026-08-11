@@ -22,6 +22,8 @@ class EvalResult(BaseModel):
     metrics: List[MetricScore]
     aggregated_scores: dict[str, float] = Field(default_factory=dict)
     config_snapshot: dict[str, object] = Field(default_factory=dict)
+    thread_id: str | None = None
+    thread_label: str | None = None
 
     def store(self, results_dir: str = "eval_results"):
         os.makedirs(results_dir, exist_ok=True)
