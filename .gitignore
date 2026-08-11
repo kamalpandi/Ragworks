@@ -12,6 +12,7 @@ wheels/
 .idea
 .ruff_cache
 .opencode
+.$ragworks_architecture.drawio.dtmp
 # Ai Models
 models/*
 

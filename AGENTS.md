@@ -39,12 +39,13 @@ This document provides high-signal instructions for working in this repository.
 
 ## Architecture Notes
 
+*   **Dual-Routed Application:** The app serves both a REST API at `/api/v1` and a server-rendered UI at `/` using Jinja2 templates and HTMX (see `app/ui/` and `app/templates/`).
 *   **Modular API Design:** The API is versioned and modularized. Add new endpoints in `app/api/v1/endpoints/` and register them in `app/api/v1/api.py`.
 *   **FastAPI Dependencies:** All FastAPI `Depends()` wiring is centralized in `app/core/dependencies.py`.
 *   **Structured Models:** API requests are in `app/models/api_requests.py` and responses are in `app/models/api_response.py`.
-*   **Dynamic Vector Tables:** The system automatically creates database tables (e.g., `knowledge_embeddings_1536`) based on embedding dimensions.
+*   **Dynamic Vector Tables:** The system automatically creates database tables (e.g., `rag_vectors_512`) based on embedding dimensions.
 *   **Domain-Specific Prompts:** System and User prompts are segregated into `app/prompts/system/` and `app/prompts/user/`. Use `load_prompt(name, category)` from `app.core.prompt_loader` to fetch them (defaults to `system`).
-*   **Frontend Integration:** A dedicated `GET /api/v1/config` endpoint provides non-sensitive configuration (defined in `app/models/frontend_config.py`) for frontend clients like Vue.js.
+*   **Frontend Integration:** A dedicated `GET /api/v1/config` endpoint provides non-sensitive configuration (defined in `app/models/frontend_config.py`) for frontend clients (e.g., the built-in Jinja2/HTMX UI).
 *   **Dynamic Query Translation:** Translation strategies (Multi-Query, HyDE, etc.) load their prompts dynamically from the `prompts/` subdirectories, allowing customization without code changes.
 *   **External Application Integration:** Standalone consumer scripts (e.g., validators) are placed in `scripts/` and interact with the RAG API over HTTP, not as part of the core `app/` logic.
 
