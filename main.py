@@ -27,7 +27,15 @@ async def lifespan(app: FastAPI):
     from app.core.migrations import run_migrations
 
     await init_pool()
-    await asyncio.to_thread(run_migrations)
+    try:
+        await asyncio.to_thread(run_migrations)
+    except Exception:
+        import logging
+
+        logging.getLogger("rag_framework").critical(
+            "migrations_failed — refusing to start with broken schema"
+        )
+        raise RuntimeError("Database migrations failed") from None
 
     if settings.OBSERVABILITY_ENABLED:
         from app.observability.log_store import log_store
@@ -71,7 +79,21 @@ app.include_router(ui_router)
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    try:
+        from app.core.pool import get_pool
+
+        pool = get_pool()
+        async with pool.connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute("SELECT 1")
+                await cur.fetchone()
+        db_status = "connected"
+    except Exception:
+        db_status = "disconnected"
+    return {
+        "status": "healthy" if db_status == "connected" else "degraded",
+        "database": db_status,
+    }
 
 
 @app.get("/metrics")

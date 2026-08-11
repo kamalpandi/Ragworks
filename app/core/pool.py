@@ -19,10 +19,25 @@ async def init_pool():
         max_size=settings.DB_POOL_MAX_SIZE,
         timeout=settings.DB_POOL_TIMEOUT,
     )
-    await _pool.open()
-    logger.info(
-        "pool_initialized", min=settings.DB_POOL_MIN_SIZE, max=settings.DB_POOL_MAX_SIZE
-    )
+    max_retries = 10
+    for attempt in range(1, max_retries + 1):
+        try:
+            await _pool.open()
+            logger.info(
+                "pool_initialized",
+                min=settings.DB_POOL_MIN_SIZE,
+                max=settings.DB_POOL_MAX_SIZE,
+            )
+            return
+        except Exception:
+            if attempt == max_retries:
+                logger.error("pool_init_failed_after_retries", attempts=max_retries)
+                raise
+            delay = min(attempt * 2, 30)
+            logger.warning("pool_init_retry", attempt=attempt, next_delay_s=delay)
+            import asyncio
+
+            await asyncio.sleep(delay)
 
 
 async def close_pool():

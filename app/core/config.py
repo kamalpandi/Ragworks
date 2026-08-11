@@ -144,8 +144,11 @@ class Settings(BaseSettings):
     # ==========================================
     @property
     def AVAILABLE_LOCAL_MODELS(self) -> List[str]:
-        if os.path.exists(self.MODELS_DIR):
-            return [f for f in os.listdir(self.MODELS_DIR) if f.endswith(".gguf")]
+        try:
+            if os.path.exists(self.MODELS_DIR):
+                return [f for f in os.listdir(self.MODELS_DIR) if f.endswith(".gguf")]
+        except (FileNotFoundError, NotADirectoryError):
+            pass
         return []
 
     # Local fallback initializer
