@@ -2,22 +2,24 @@
 <main class="container">
   <hgroup>
     <h1>Log Viewer</h1>
-    <p>Structured logging with filtering and search</p>
+    <p>Structured logging with filtering, search, and pagination</p>
   </hgroup>
 
-  <article id="log-stats" hx-get="/ui/logs/stats" hx-trigger="load, every 10s">
+  <article id="log-stats" hx-get="/ui/logs/stats" hx-trigger="load">
     <p>Loading stats...</p>
   </article>
 
   <article>
     <header>Filter Logs</header>
     <form
+      id="log-filter-form"
       hx-get="/ui/logs/list"
       hx-target="#log-entries"
-      hx-trigger="submit, change from:#log-level, change from:#log-search"
+      hx-trigger="submit, change from:#log-level"
+      hx-include="#log-search, #log-since, #log-until"
     >
-      <div style="display: flex; gap: 1rem">
-        <select id="log-level" name="level">
+      <div style="display: flex; gap: 0.75rem; align-items: end; flex-wrap: wrap;">
+        <select id="log-level" name="level" style="max-width: 140px;">
           <option value="">All Levels</option>
           <option value="DEBUG">DEBUG</option>
           <option value="INFO">INFO</option>
@@ -29,9 +31,17 @@
           name="search"
           type="search"
           placeholder="Search logs..."
-          style="flex: 1"
+          style="flex: 1; min-width: 200px;"
         />
-        <button type="submit">Refresh</button>
+        <label style="margin-bottom: 0; max-width: 160px;">
+          From
+          <input id="log-since" name="since" type="datetime-local" style="margin-bottom: 0;" />
+        </label>
+        <label style="margin-bottom: 0; max-width: 160px;">
+          To
+          <input id="log-until" name="until" type="datetime-local" style="margin-bottom: 0;" />
+        </label>
+        <button type="submit">Filter</button>
       </div>
     </form>
   </article>
@@ -40,4 +50,14 @@
     <p>Loading logs...</p>
   </div>
 </main>
+
+<script>
+  var searchTimer;
+  document.getElementById("log-search").addEventListener("input", function () {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+      htmx.trigger("#log-filter-form", "submit");
+    }, 300);
+  });
+</script>
 {% endblock %}

@@ -1,5 +1,15 @@
 <article>
-  <header>Log Statistics</header>
+  <header>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span>Log Statistics</span>
+      <button
+        style="font-size: 0.75rem; padding: 0.2rem 0.5rem; margin: 0;"
+        hx-get="/ui/logs/stats"
+        hx-target="#log-stats"
+        class="secondary outline"
+      >Refresh</button>
+    </div>
+  </header>
   {% if stats.enabled %}
   <table class="striped">
     <tbody>
