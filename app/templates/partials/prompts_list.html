@@ -1,8 +1,16 @@
-<div style="display: flex; gap: 2rem; flex-wrap: wrap">
+<div id="prompts-container" style="display: flex; gap: 2rem; flex-wrap: wrap">
   <div style="flex: 1; min-width: 300px">
-    <h2>System Prompts</h2>
+    <h2>
+      System Prompts
+      <button
+        hx-get="/ui/prompts/new"
+        hx-target="#prompts-container"
+        hx-swap="innerHTML"
+        style="font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 0.5rem; vertical-align: middle;"
+      >+ New</button>
+    </h2>
     {% if system_prompts %} {% for prompt in system_prompts %}
-    <article style="padding: 1rem; margin-bottom: 1rem">
+    <article style="padding: 1rem; margin-bottom: 1rem" id="prompt-system-{{ prompt.name }}">
       <header>
         <strong>{{ prompt.name | replace('_', ' ') | title }}</strong>
       </header>
@@ -16,6 +24,23 @@
           margin: 0;
         "
       >{{ prompt.content }}</pre>
+      <footer style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+        <button
+          style="font-size: 0.75rem; padding: 0.25rem 0.75rem; margin: 0;"
+          hx-get="/ui/prompts/edit/system/{{ prompt.name }}"
+          hx-swap="outerHTML"
+          hx-target="#prompt-system-{{ prompt.name }}"
+        >Edit</button>
+        {% if prompt.name != "default" %}
+        <button
+          style="font-size: 0.75rem; padding: 0.25rem 0.75rem; margin: 0; background: var(--pico-del-color); border-color: var(--pico-del-color);"
+          hx-delete="/ui/prompts/delete/system/{{ prompt.name }}"
+          hx-target="#prompts-container"
+          hx-swap="innerHTML"
+          hx-confirm="Delete '{{ prompt.name }}' prompt?"
+        >Delete</button>
+        {% endif %}
+      </footer>
     </article>
     {% endfor %} {% else %}
     <p style="color: var(--pico-muted-color)">No system prompts found.</p>
@@ -23,9 +48,17 @@
   </div>
 
   <div style="flex: 1; min-width: 300px">
-    <h2>User Prompts</h2>
+    <h2>
+      User Prompts
+      <button
+        hx-get="/ui/prompts/new"
+        hx-target="#prompts-container"
+        hx-swap="innerHTML"
+        style="font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 0.5rem; vertical-align: middle;"
+      >+ New</button>
+    </h2>
     {% if user_prompts %} {% for prompt in user_prompts %}
-    <article style="padding: 1rem; margin-bottom: 1rem">
+    <article style="padding: 1rem; margin-bottom: 1rem" id="prompt-user-{{ prompt.name }}">
       <header>
         <strong>{{ prompt.name | replace('_', ' ') | title }}</strong>
       </header>
@@ -39,6 +72,21 @@
           margin: 0;
         "
       >{{ prompt.content }}</pre>
+      <footer style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+        <button
+          style="font-size: 0.75rem; padding: 0.25rem 0.75rem; margin: 0;"
+          hx-get="/ui/prompts/edit/user/{{ prompt.name }}"
+          hx-swap="outerHTML"
+          hx-target="#prompt-user-{{ prompt.name }}"
+        >Edit</button>
+        <button
+          style="font-size: 0.75rem; padding: 0.25rem 0.75rem; margin: 0; background: var(--pico-del-color); border-color: var(--pico-del-color);"
+          hx-delete="/ui/prompts/delete/user/{{ prompt.name }}"
+          hx-target="#prompts-container"
+          hx-swap="innerHTML"
+          hx-confirm="Delete '{{ prompt.name }}' prompt?"
+        >Delete</button>
+      </footer>
     </article>
     {% endfor %} {% else %}
     <p style="color: var(--pico-muted-color)">No user prompts found.</p>

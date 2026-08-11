@@ -66,6 +66,9 @@ Edit `.env` — the only required change is your OpenAI key:
 
 ```ini
 OPENAI_API_KEY=sk-your-key-here
+
+# Optional: skip API key auth during development
+DEV_API_KEY=dev-skip-auth
 ```
 
 Default settings work out of the box:
@@ -123,18 +126,20 @@ The server initializes in this order:
 
 ### 5. Verify It Works
 
+**With dev key (recommended for development):**
+
 ```bash
-# Health check (includes database status)
+# Health check (exempt from auth — no key needed)
 curl http://localhost:8000/health
 # → {"status":"healthy","database":"connected"}
 
-# View API docs
+# API calls with the dev key
+curl -H "X-API-Key: dev-skip-auth" http://localhost:8000/api/v1/config
+
+# Swagger UI (exempt from auth)
 open http://localhost:8000/docs
 
-# Check server configuration
-curl http://localhost:8000/api/v1/config
-
-# Open the Web UI
+# Web UI (exempt from auth)
 open http://localhost:8000/
 ```
 
@@ -145,16 +150,22 @@ open http://localhost:8000/
 ### Smoke test the full pipeline
 
 ```bash
+# Set your dev key (add to ~/.zshrc for persistence)
+export DEV_KEY="dev-skip-auth"
+
 # 1. Ingest a URL
 curl -X POST "http://localhost:8000/api/v1/ingest/url" \
+  -H "X-API-Key: $DEV_KEY" \
   -H "Content-Type: application/json" \
   -d '{"url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation"}'
 
 # 2. List ingested files
-curl "http://localhost:8000/api/v1/ingest/files"
+curl -H "X-API-Key: $DEV_KEY" \
+  "http://localhost:8000/api/v1/ingest/files"
 
 # 3. Query the knowledge base
 curl -X POST "http://localhost:8000/api/v1/query" \
+  -H "X-API-Key: $DEV_KEY" \
   -H "Content-Type: application/json" \
   -d '{"message": "What is RAG?", "file_name": "Retrieval-augmented_generation"}'
 ```

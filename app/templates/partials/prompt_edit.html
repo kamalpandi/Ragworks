@@ -1,0 +1,51 @@
+<article style="padding: 1rem; margin-bottom: 1rem; border: 2px solid var(--pico-primary);">
+  <form
+    hx-post="/ui/prompts/save"
+    hx-target="#prompts-container"
+    hx-swap="innerHTML"
+  >
+    {% if is_new %}
+    <label style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+      <span style="flex-shrink: 0;">Name:</span>
+      <input
+        type="text"
+        name="name"
+        placeholder="my_prompt"
+        value="{{ name }}"
+        required
+        style="margin-bottom: 0; max-width: 200px;"
+      />
+      <span style="flex-shrink: 0;">Category:</span>
+      <select name="category" style="margin-bottom: 0; max-width: 130px;">
+        <option value="system" {% if category == "system" %}selected{% endif %}>System</option>
+        <option value="user" {% if category == "user" %}selected{% endif %}>User</option>
+      </select>
+    </label>
+    <input type="hidden" name="is_new" value="true" />
+    {% else %}
+    <header style="margin-bottom: 0.5rem;">
+      <strong>{{ name | replace('_', ' ') | title }}</strong>
+      <small style="color: var(--pico-muted-color); margin-left: 0.5rem;">({{ category }})</small>
+    </header>
+    <input type="hidden" name="name" value="{{ name }}" />
+    <input type="hidden" name="category" value="{{ category }}" />
+    {% endif %}
+
+    <textarea
+      name="content"
+      rows="{{ (content.split('\n') | length) + 2 }}"
+      style="width: 100%; font-family: monospace; font-size: 0.85rem; margin-bottom: 0.5rem; resize: vertical;"
+    >{{ content }}</textarea>
+
+    <footer>
+      <button type="submit" style="margin-right: 0.5rem;">Save</button>
+      <button
+        type="button"
+        hx-get="/ui/prompts/load"
+        hx-target="#prompts-container"
+        hx-swap="innerHTML"
+        style="background: var(--pico-secondary); border-color: var(--pico-secondary);"
+      >Cancel</button>
+    </footer>
+  </form>
+</article>

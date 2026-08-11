@@ -23,6 +23,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         api_key = _extract_api_key(request)
 
+        if settings.DEV_API_KEY and api_key == settings.DEV_API_KEY:
+            logger.info("dev_key_used", key_prefix=settings.DEV_API_KEY[:8])
+            request.state.tenant_id = "dev"
+            return await call_next(request)
+
         admin_header = request.headers.get("X-Admin-Key", "")
         is_admin = admin_header and admin_header == settings.ADMIN_API_KEY
         if is_admin:

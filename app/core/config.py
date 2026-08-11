@@ -121,8 +121,9 @@ class Settings(BaseSettings):
     # 8. Authentication & Security
     # ==========================================
     AUTH_ENABLED: bool = True
-    AUTH_EXEMPT_PATHS: str = "/metrics,/docs,/openapi.json,/health,/login"
+    AUTH_EXEMPT_PATHS: str = "/metrics,/docs,/openapi.json,/health,/login,/favicon.ico"
     ADMIN_API_KEY: str = os.getenv("ADMIN_API_KEY", "admin-change-me")
+    DEV_API_KEY: str = os.getenv("DEV_API_KEY", "")
 
     # ==========================================
     # 9. Rate Limiting

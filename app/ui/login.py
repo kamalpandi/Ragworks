@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from app.core.config import settings
 from app.services.api_key_manager import validate_api_key
 from app.ui import templates
 
@@ -25,7 +26,19 @@ async def login_submit(api_key: str = Form(...), next_path: str = Form("/")):
             content={"success": False, "error": "API key is required"},
         )
 
-    result = await validate_api_key(api_key.strip())
+    stripped = api_key.strip()
+
+    if settings.DEV_API_KEY and stripped == settings.DEV_API_KEY:
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "api_key": stripped,
+                "tenant_id": "dev",
+            },
+        )
+
+    result = await validate_api_key(stripped)
 
     if result is None:
         return JSONResponse(
