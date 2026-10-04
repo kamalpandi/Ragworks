@@ -27,24 +27,27 @@ Execution order: 2.1 → 2.4 → 2.5 → 2.3 → 2.7 → 2.2 → 2.6 (keep the t
 
 ## 4. Phase 3 — Migrate frontend views
 
+> **Strangler rule (4.3-4.10):** both `app/ui` and `app/frontend` mount at `/`, so a path must never exist in both routers. Each domain is migrated and its paired `app/ui` handler deleted **in the same commit**. No double-mount, no dead handlers.
+
 - [ ] 4.1 Add frontend auth views: `GET /login`, `POST /login` (validate via `/api/v1/auth/me`, create session), `POST /logout`; verify valid/invalid/dev login and POST-only logout (GET → 405)
-- [ ] 4.2 Add session dependency + login redirect to frontend pages/fragments; verify unauthenticated `/query` returns 302 to `/login`. **Sequencing: 4.1 (login views) MUST land before the `AuthMiddleware` is narrowed to `/api/v1/*` (D3), otherwise there is a window where `/` is neither API-guarded nor session-guarded**
-- [ ] 4.3 Migrate page shells (`/`, `/config`, `/ingest`, `/query`, `/logs`, `/eval`, `/prompts`) to render-only frontend views; verify pages render with no backend imports
-- [ ] 4.4 Migrate dashboard fragments to call `/api/v1/dashboard` via `api_client`; verify status/stats/activity/docs fragments populate
-- [ ] 4.5 Migrate config fragment to use `/api/v1/config` (curated config, not raw `settings`); verify the page renders the safe fields
-- [ ] 4.6 Migrate ingest views (form fragments + file/url/custom handlers) through `api_client`; verify all three ingestion modes still queue work
-- [ ] 4.7 Migrate query views (`/ui/query/chat`, thread load) through `api_client`, moving `enrich_query` to the backend call; verify chat append and thread switching
-- [ ] 4.8 Migrate observability fragments (list + stats) through `api_client`; verify filtering, pagination, and debounced submit
-- [ ] 4.9 Migrate eval views (run, progress polling, results, compare) through `api_client`; verify 2s polling and completion refresh render from JSON
-- [ ] 4.10 Migrate prompts views (list, edit, new, save, delete) through `api_client` with CSRF on writes; verify CRUD and default-prompt protections
+- [ ] 4.2 Add session dependency + login redirect to `app.frontend` routes only; verify unauthenticated frontend routes return 302 to `/login`. **Scope: protects `app.frontend` routes only. `app/ui` routes remain API-key-guarded by the app-wide middleware until Phase 4; full frontend protection arrives once `app/ui` is gone and the middleware is narrowed (5.2)**
+- [ ] 4.3 Migrate page shells (`/`, `/config`, `/ingest`, `/query`, `/logs`, `/eval`, `/prompts`) to render-only frontend views; **delete the paired `app/ui` page route in the same commit**; verify pages render and `/` is served by `app.frontend`
+- [ ] 4.4 Migrate dashboard fragments to call `/api/v1/dashboard` via `api_client`; **delete the paired `app/ui/dashboard.py` handlers in the same commit**; verify status/stats/activity/docs fragments populate
+- [ ] 4.5 Migrate config fragment to use `/api/v1/config` (curated config, not raw `settings`); **delete the paired `app/ui/config.py` fragment handler in the same commit**; verify the page renders the safe fields
+- [ ] 4.6 Migrate ingest views (form fragments + file/url/custom handlers) through `api_client`; **delete the paired `app/ui/ingest.py` handlers in the same commit**; verify all three ingestion modes still queue work
+- [ ] 4.7 Migrate query views (`/ui/query/chat`, thread load) through `api_client`, moving `enrich_query` to the backend call; **delete the paired `app/ui/query.py` handlers in the same commit**; verify chat append and thread switching
+- [ ] 4.8 Migrate observability fragments (list + stats) through `api_client`; **delete the paired `app/ui/observability.py` handlers in the same commit**; verify filtering, pagination, and debounced submit
+- [ ] 4.9 Migrate eval views (run, progress polling, results, compare) through `api_client`; **delete the paired `app/ui/eval_ui.py` handlers in the same commit**; verify 2s polling and completion refresh render from JSON
+- [ ] 4.10 Migrate prompts views (list, edit, new, save, delete) through `api_client` with CSRF on writes; **delete the paired `app/ui/prompts.py` handlers in the same commit**; verify CRUD and default-prompt protections
 - [ ] 4.11 Remove browser API-key code from `base.html` and `login.html`; verify the browser stores no key and login is a normal form POST
 
 ## 5. Phase 4 — Remove legacy UI
 
-- [ ] 5.1 Delete `app/ui/**` and update `main.py` / imports; verify the app starts with no references to `app.ui`
-- [ ] 5.2 Remove all remaining `HX-Request` branches from the backend; verify `grep -R "HX-Request"` returns only frontend template usage, none in `app/api`
-- [ ] 5.3 Run `git status` to check whether the Phase 1 move left `app/templates`/`app/static` behind; if present, delete them along with orphaned partials; verify no dangling path references remain
-- [ ] 5.4 Update `AGENTS.md` architecture notes to describe the frontend/backend boundary and new endpoints; verify the doc matches the tree
+- [ ] 5.1 Delete the remaining `app/ui/**` (router + package) and update `main.py` / imports; verify the app starts with no references to `app.ui`
+- [ ] 5.2 Narrow `AuthMiddleware` to `/api/v1/*` only and remove the frontend-path exemptions (D3). **Apply only after every route is owned by `app.frontend` (4.3-4.10 + 5.1)**. Verify browser routes (`/`, `/ui/*`) are guarded by the frontend session layer and no longer intercepted by API-key middleware, while `/api/v1/*` still returns 401 without a key
+- [ ] 5.3 Remove all remaining `HX-Request` branches from the backend; verify `grep -R "HX-Request"` returns only frontend template usage, none in `app/api`
+- [ ] 5.4 Run `git status` to check whether the Phase 1 move left `app/templates`/`app/static` behind; if present, delete them along with orphaned partials; verify no dangling path references remain
+- [ ] 5.5 Update `AGENTS.md` architecture notes to describe the frontend/backend boundary and new endpoints; verify the doc matches the tree
 
 ## 6. Phase 5 — Verification
 
