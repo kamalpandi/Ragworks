@@ -40,6 +40,7 @@ Execution order: 2.1 → 2.4 → 2.5 → 2.3 → 2.7 → 2.2 → 2.6 (keep the t
 - [ ] 4.9 Migrate eval views (run, progress polling, results, compare) through `api_client`; **delete the paired `app/ui/eval_ui.py` handlers in the same commit**; verify 2s polling and completion refresh render from JSON
 - [ ] 4.10 Migrate prompts views (list, edit, new, save, delete) through `api_client` with CSRF on writes; **delete the paired `app/ui/prompts.py` handlers in the same commit**; verify CRUD and default-prompt protections
 - [ ] 4.11 Remove browser API-key code from `base.html` and `login.html`; verify the browser stores no key and login is a normal form POST
+- [x] 4.12 Re-verify `/query` end-to-end against a live LLM once a valid key is present (closes the 4.7 stub gap): real answer markdown, real citations/`generated_queries`, and persisted thread reload. Evidence: live chat `200` → `<p>pong</p>`; `GET /ui/query/thread/live-t1` → `200` with You/Assistant turns
 
 ## 5. Phase 4 — Remove legacy UI
 

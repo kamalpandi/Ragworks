@@ -84,6 +84,11 @@ URLs are cosmetic; ownership of templates/static is not. Move `app/templates` an
 - **Alternative (deferred)**: render the shell empty and load option lists via HTMX fragments (like the dashboard). Cleaner separation and progressive loading, but requires new frontend fragment endpoints; only worth it if first-paint orchestration proves costly.
 - **Rule**: a shell may call the API; it may not import backend modules. Multi-call shells are candidates for later fragmentization.
 
+### D13: HTMX error idiom — retarget to a banner, return 200
+A failing frontend fragment (chat, eval run, prompt save, log clear) returns HTTP 200 so HTMX performs the swap, with `HX-Retarget: #<domain>-error` and `HX-Reswap: innerHTML`, and a small error partial body. The frontend maps the backend's 4xx/5xx `detail` to a friendly title/message; the banner is cleared on `htmx:beforeRequest`.
+- **Why**: HTMX does not swap non-2xx responses by default, so returning the backend status silently drops the error; rendering into the default target would append a fake success-style node (e.g. a fake assistant message).
+- **Rule**: every POST-capable fragment gets a dedicated error container and the same retarget pattern; never render errors into the primary target.
+
 ## Risks / Trade-offs
 
 - **In-memory sessions break with `APP_WORKERS > 1`** → pin/validate `APP_WORKERS=1`; keep `SessionStore` an interface for later Postgres/Redis.
