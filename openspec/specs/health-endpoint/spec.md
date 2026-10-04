@@ -2,7 +2,7 @@
 
 ## Purpose
 
-TBD
+Expose an unauthenticated liveness probe at `GET /health` so orchestrators, load balancers, and deployment checks can confirm the service is running without presenting an API key.
 
 ## Requirements
 

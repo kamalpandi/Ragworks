@@ -29,6 +29,13 @@ async def lifespan(app: FastAPI):
     from app.core.sessions import InMemorySessionStore
     from app.frontend.api_client import BackendClient
 
+    if settings.APP_WORKERS > 1:
+        raise RuntimeError(
+            "APP_WORKERS=1 is required: the frontend session store and eval job "
+            "state are in-process. Scaling out needs a shared session store "
+            "(e.g. Postgres/Redis) first."
+        )
+
     await init_pool()
     try:
         await asyncio.to_thread(run_migrations)
