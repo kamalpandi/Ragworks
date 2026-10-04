@@ -33,7 +33,7 @@ Execution order: 2.1 → 2.4 → 2.5 → 2.3 → 2.7 → 2.2 → 2.6 (keep the t
 - [x] 4.2 Add session dependency + login redirect to `app.frontend` routes only; verify unauthenticated frontend routes return 302 to `/login`. **Scope: protects `app.frontend` routes only. `app/ui` routes remain API-key-guarded by the app-wide middleware until Phase 4; full frontend protection arrives once `app/ui` is gone and the middleware is narrowed (5.2)**
 - [x] 4.3 Migrate page shells (`/`, `/config`, `/ingest`, `/query`, `/logs`, `/eval`, `/prompts`) to render-only frontend views; **delete the paired `app/ui` page route in the same commit**; verify pages render and `/` is served by `app.frontend` (slices: `/`+`/config`, `/ingest`, `/logs`, `/eval`, `/query`, `/prompts`; `/eval`+`/query` fetch initial data via `api_client` per D12)
 - [x] 4.4 Migrate dashboard fragments to call `/api/v1/dashboard` via `api_client`; **delete the paired `app/ui/dashboard.py` handlers in the same commit**; verify status/stats/activity/docs fragments populate (slices: status `/api/v1/status`+`/config`; activity `/api/v1/logs/`; docs `/api/v1/ingest/files`; stats `/api/v1/dashboard`+`/config`; `app/ui/dashboard.py` deleted)
-- [ ] 4.5 Migrate config fragment to use `/api/v1/config` (curated config, not raw `settings`); **delete the paired `app/ui/config.py` fragment handler in the same commit**; verify the page renders the safe fields
+- [x] 4.5 Migrate config fragment to use `/api/v1/config` (curated config, not raw `settings`); **delete the paired `app/ui/config.py` fragment handler in the same commit**; verify the page renders the safe fields
 - [ ] 4.6 Migrate ingest views (form fragments + file/url/custom handlers) through `api_client`; **delete the paired `app/ui/ingest.py` handlers in the same commit**; verify all three ingestion modes still queue work
 - [ ] 4.7 Migrate query views (`/ui/query/chat`, thread load) through `api_client`, moving `enrich_query` to the backend call; **delete the paired `app/ui/query.py` handlers in the same commit**; verify chat append and thread switching
 - [ ] 4.8 Migrate observability fragments (list + stats) through `api_client`; **delete the paired `app/ui/observability.py` handlers in the same commit**; verify filtering, pagination, and debounced submit
@@ -57,3 +57,7 @@ Execution order: 2.1 → 2.4 → 2.5 → 2.3 → 2.7 → 2.2 → 2.6 (keep the t
 - [ ] 6.4 Postman check: every `/api/v1/*` endpoint returns JSON (never HTML), including eval with `HX-Request: true`
 - [ ] 6.5 DevTools check: browser requests never target `/api/v1/*` and never expose the API key
 - [ ] 6.6 Confirm `APP_WORKERS=1` in deployment config and document the session-store limitation
+
+## 7. Follow-ups (deferred decisions)
+
+- [ ] 7.1 Decide whether `/api/v1/config` should filter internal hosts (`REMOTE_LLAMACPP_URL`, `OLLAMA_BASE_URL`, `OTEL_EXPORTER_ENDPOINT`) for non-operator or limited-scope keys. Not a current leak (any principal that can read `/config` already has the API key), but it becomes one if a read-only/limited key or a broader-audience config view is introduced. If such a view is added, filter the fragment and the API in the same commit, never one alone.
