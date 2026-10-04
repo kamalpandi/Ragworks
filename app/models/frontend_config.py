@@ -46,6 +46,9 @@ class FrontendConfig(BaseModel):
     RERANKER_PROVIDER: Literal["flashrank", "bge", "cohere"]
     RERANK_TOP_K: int
 
+    # Rate limiting
+    RATE_LIMIT_ENABLED: bool
+
     # Observability
     OBSERVABILITY_ENABLED: bool
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"]

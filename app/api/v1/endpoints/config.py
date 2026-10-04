@@ -42,6 +42,7 @@ async def get_frontend_config(request: Request):
             RERANKER_ENABLED=settings.RERANKER_ENABLED,
             RERANKER_PROVIDER=settings.RERANKER_PROVIDER,
             RERANK_TOP_K=settings.RERANK_TOP_K,
+            RATE_LIMIT_ENABLED=settings.RATE_LIMIT_ENABLED,
             OBSERVABILITY_ENABLED=settings.OBSERVABILITY_ENABLED,
             LOG_LEVEL=settings.LOG_LEVEL,
             LOG_FORMAT=settings.LOG_FORMAT,
