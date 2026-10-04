@@ -10,11 +10,6 @@ router = APIRouter()
 PAGE_SIZE = 50
 
 
-@router.get("/logs", response_class=HTMLResponse)
-def logs_page(request: Request):
-    return templates.TemplateResponse(request=request, name="pages/observability.html")
-
-
 @router.get("/ui/logs/list", response_class=HTMLResponse)
 async def htmx_logs_list(
     request: Request,

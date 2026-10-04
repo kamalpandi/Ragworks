@@ -25,3 +25,8 @@ async def config_page(request: Request, _session=Depends(require_session)):
 @router.get("/ingest")
 async def ingest_page(request: Request, _session=Depends(require_session)):
     return templates.TemplateResponse(request=request, name="pages/ingest.html")
+
+
+@router.get("/logs")
+async def logs_page(request: Request, _session=Depends(require_session)):
+    return templates.TemplateResponse(request=request, name="pages/observability.html")
