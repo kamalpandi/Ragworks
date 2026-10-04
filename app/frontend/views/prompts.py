@@ -8,11 +8,15 @@ the backend; the frontend only forwards the operation and renders the detail
 import logging
 
 import httpx
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 
 from app.frontend import templates
-from app.frontend.deps import get_backend_client, require_session
+from app.frontend.deps import (
+    get_backend_client,
+    require_session,
+    verify_session_csrf,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +60,76 @@ async def _list(request: Request, session) -> HTMLResponse:
     )
 
 
+def _error(request: Request, message: str, *, retarget: bool):
+    headers = (
+        {"HX-Retarget": "#prompts-error", "HX-Reswap": "innerHTML"}
+        if retarget
+        else None
+    )
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/error_banner.html",
+        context={"title": "Prompt error:", "message": message},
+        headers=headers,
+    )
+
+
 @router.get("/ui/prompts/load", response_class=HTMLResponse)
 async def ui_prompts_list(request: Request, session=Depends(require_session)):
+    return await _list(request, session)
+
+
+@router.get("/ui/prompts/edit/{category}/{name}", response_class=HTMLResponse)
+async def ui_prompts_edit(
+    request: Request,
+    category: str,
+    name: str,
+    session=Depends(require_session),
+):
+    resp = await get_backend_client(request).get(
+        f"/api/v1/prompts/{name}",
+        params={"category": category},
+        api_key=session.api_key,
+    )
+    if resp.status_code >= 400:
+        logger.warning("prompts_edit_failed status=%s name=%s", resp.status_code, name)
+        return _error(request, _detail(resp), retarget=True)
+
+    data = resp.json()
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/prompt_edit.html",
+        context={
+            "name": data.get("name", name),
+            "category": data.get("category", category),
+            "content": data.get("content", ""),
+            "is_new": False,
+        },
+    )
+
+
+@router.post("/ui/prompts/save", response_class=HTMLResponse)
+async def ui_prompts_save(
+    request: Request,
+    name: str = Form(""),
+    content: str = Form(""),
+    category: str = Form("system"),
+    session=Depends(require_session),
+):
+    verify_session_csrf(request, session)
+
+    name = name.strip()
+    category = category.strip()
+    if not name:
+        return _error(request, "Prompt name is required", retarget=True)
+
+    resp = await get_backend_client(request).put(
+        f"/api/v1/prompts/{name}",
+        json={"category": category, "content": content},
+        api_key=session.api_key,
+    )
+    if resp.status_code >= 400:
+        logger.warning("prompts_save_failed status=%s name=%s", resp.status_code, name)
+        return _error(request, _detail(resp), retarget=True)
+
     return await _list(request, session)
