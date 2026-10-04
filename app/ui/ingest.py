@@ -2,7 +2,6 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Request, Up
 from fastapi.responses import HTMLResponse
 
 from app.components.loaders.pdf_loader import parse_pdf
-from app.components.loaders.web_loader import parse_url
 from app.core.dependencies import get_ingestion_service
 
 router = APIRouter()
@@ -39,25 +38,6 @@ async def ui_ingest_file(
         tenant_id=tenant_id,
     )
     return f"<span style='color: var(--pico-ins-color);'>'{file.filename}' queued for background processing!</span>"
-
-
-@router.post("/ui/ingest/url", response_class=HTMLResponse)
-async def ui_ingest_url(
-    request: Request,
-    background_tasks: BackgroundTasks,
-    url: str = Form(...),
-    service=Depends(get_ingestion_service),
-):
-    result = await parse_url(url, respect_robots=False)
-    if not result.text:
-        return "<span style='color: var(--pico-del-color);'>Could not extract text from URL.</span>"
-
-    tenant_id = getattr(request.state, "tenant_id", "default")
-
-    background_tasks.add_task(
-        service.ingest_texts, texts=[result.text], source_name=url, tenant_id=tenant_id
-    )
-    return f"<span style='color: var(--pico-ins-color);'>URL extraction for '{url}' started!</span>"
 
 
 @router.post("/ui/ingest/custom", response_class=HTMLResponse)
