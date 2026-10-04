@@ -78,6 +78,12 @@ Remove `HX-Request` branches, inline Jinja, `_render_result_card`, `HX-Trigger`,
 ### D11: Keep `/ui/*`; relocate templates/static under `app/frontend/`
 URLs are cosmetic; ownership of templates/static is not. Move `app/templates` and `app/static` into `app/frontend/`.
 
+### D12: Data-bearing page shells fetch initial data over the API
+`/eval` and `/query` are not pure shells: `eval.html` renders the metric checkboxes (`eval.html:11`) and thread dropdown (`eval.html:49,60`); `query.html` renders the file datalist (`query.html:66`), thread dropdown (`query.html:77`), and prompt dropdown (`query.html:108`). Today `app/ui/eval_ui.py:15-29` and `app/ui/query.py:19-22` compute these from backend internals.
+- **Decision**: the frontend shell handler obtains them via `api_client` (`GET /api/v1/eval/metrics`, `/api/v1/eval/results`, `/api/v1/conversations`, `/api/v1/prompts`, `/api/v1/ingest/files`) using the session key, then renders. This keeps the shell free of backend imports while preserving first-paint content.
+- **Alternative (deferred)**: render the shell empty and load option lists via HTMX fragments (like the dashboard). Cleaner separation and progressive loading, but requires new frontend fragment endpoints; only worth it if first-paint orchestration proves costly.
+- **Rule**: a shell may call the API; it may not import backend modules. Multi-call shells are candidates for later fragmentization.
+
 ## Risks / Trade-offs
 
 - **In-memory sessions break with `APP_WORKERS > 1`** → pin/validate `APP_WORKERS=1`; keep `SessionStore` an interface for later Postgres/Redis.
