@@ -28,20 +28,6 @@ def _render_list(request: Request) -> HTMLResponse:
     )
 
 
-@router.get("/ui/prompts/new", response_class=HTMLResponse)
-async def htmx_new_form(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/prompt_edit.html",
-        context={
-            "name": "",
-            "category": "system",
-            "content": "",
-            "is_new": True,
-        },
-    )
-
-
 @router.delete("/ui/prompts/delete/{category}/{name}", response_class=HTMLResponse)
 async def htmx_delete_prompt(request: Request, category: str, name: str):
     if name == "default" and category == "system":

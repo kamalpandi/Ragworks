@@ -79,6 +79,20 @@ async def ui_prompts_list(request: Request, session=Depends(require_session)):
     return await _list(request, session)
 
 
+@router.get("/ui/prompts/new", response_class=HTMLResponse)
+async def ui_prompts_new(request: Request, _session=Depends(require_session)):
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/prompt_edit.html",
+        context={
+            "name": "",
+            "category": "system",
+            "content": "",
+            "is_new": True,
+        },
+    )
+
+
 @router.get("/ui/prompts/edit/{category}/{name}", response_class=HTMLResponse)
 async def ui_prompts_edit(
     request: Request,
