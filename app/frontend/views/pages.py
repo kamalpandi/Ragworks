@@ -7,7 +7,7 @@ not-yet-migrated ``app/ui`` routes (different URLs) during the transition.
 from fastapi import APIRouter, Depends, Request
 
 from app.frontend import templates
-from app.frontend.deps import require_session
+from app.frontend.deps import get_backend_client, require_session
 
 router = APIRouter()
 
@@ -30,3 +30,16 @@ async def ingest_page(request: Request, _session=Depends(require_session)):
 @router.get("/logs")
 async def logs_page(request: Request, _session=Depends(require_session)):
     return templates.TemplateResponse(request=request, name="pages/observability.html")
+
+
+@router.get("/eval")
+async def eval_page(request: Request, session=Depends(require_session)):
+    client = get_backend_client(request)
+    key = session.api_key
+    metrics = (await client.get("/api/v1/eval/metrics", api_key=key)).json()["metrics"]
+    threads = (await client.get("/api/v1/conversations", api_key=key)).json()["threads"]
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/eval.html",
+        context={"metrics": metrics, "threads": threads},
+    )

@@ -2,36 +2,10 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from app.core.config import settings
-from app.evaluation.metrics import list_available_metrics
 from app.evaluation.models import EvalResult
-from app.services.conversation_service import list_threads
 from app.ui import templates
 
 router = APIRouter()
-
-
-@router.get("/eval", response_class=HTMLResponse)
-async def eval_page(request: Request):
-    metrics = list_available_metrics()
-    results = EvalResult.list_results(settings.EVAL_RESULTS_DIR)
-    results_data = [
-        {
-            "id": r.id,
-            "timestamp": r.timestamp,
-            "dataset_name": r.dataset_name,
-            "num_samples": r.num_samples,
-            "aggregated_scores": r.aggregated_scores,
-            "thread_label": r.thread_label,
-        }
-        for r in results
-    ]
-    tenant_id = getattr(request.state, "tenant_id", "default")
-    threads = await list_threads(tenant_id)
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/eval.html",
-        context={"metrics": metrics, "results": results_data, "threads": threads},
-    )
 
 
 @router.get("/ui/eval/results", response_class=HTMLResponse)
