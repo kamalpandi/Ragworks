@@ -29,11 +29,6 @@ def _render_list(request: Request) -> HTMLResponse:
     )
 
 
-@router.get("/ui/prompts/load", response_class=HTMLResponse)
-async def htmx_prompts_list(request: Request):
-    return _render_list(request)
-
-
 @router.get("/ui/prompts/edit/{category}/{name}", response_class=HTMLResponse)
 async def htmx_edit_form(request: Request, category: str, name: str):
     content = load_prompt(name, category)

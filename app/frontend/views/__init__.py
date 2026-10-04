@@ -14,6 +14,7 @@ from app.frontend.views import (
     ingest,
     observability,
     pages,
+    prompts,
     query,
 )
 
@@ -27,3 +28,4 @@ router.include_router(ingest.router)
 router.include_router(query.router)
 router.include_router(observability.router)
 router.include_router(eval.router)
+router.include_router(prompts.router)
