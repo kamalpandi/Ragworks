@@ -25,7 +25,7 @@
           <li><a href="/logs">Logs</a></li>
           <li><a href="/eval">Evaluation</a></li>
           <li><a href="/prompts">Prompts</a></li>
-          <li><a href="#" id="logout-link" style="display: none;" onclick="logout()">Logout</a></li>
+          <li><a href="#" id="logout-link" onclick="logout()">Logout</a></li>
         </ul>
       </nav>
 
@@ -35,26 +35,7 @@
     </main>
 
     <script>
-      function getApiKey() {
-        var stored = localStorage.getItem("rag_api_key");
-        if (stored) return stored;
-        var match = document.cookie.match(/(?:^|;\s*)rag_api_key=([^;]*)/);
-        if (match) {
-          var key = decodeURIComponent(match[1]);
-          localStorage.setItem("rag_api_key", key);
-          return key;
-        }
-        return null;
-      }
-
-      function isLoggedIn() {
-        return !!getApiKey();
-      }
-
       function logout() {
-        localStorage.removeItem("rag_api_key");
-        localStorage.removeItem("rag_tenant_id");
-        document.cookie = "rag_api_key=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         var meta = document.querySelector('meta[name="csrf-token"]');
         var form = document.createElement("form");
         form.method = "post";
@@ -70,18 +51,7 @@
         form.submit();
       }
 
-      function updateLogoutLink() {
-        var link = document.getElementById("logout-link");
-        if (link) {
-          link.style.display = isLoggedIn() ? "inline" : "none";
-        }
-      }
-
       document.addEventListener("htmx:configRequest", function (event) {
-        var apiKey = getApiKey();
-        if (apiKey) {
-          event.detail.headers["X-API-Key"] = apiKey;
-        }
         var verb = (event.detail.verb || "").toLowerCase();
         if (verb && verb !== "get") {
           var meta = document.querySelector('meta[name="csrf-token"]');
@@ -90,8 +60,6 @@
           }
         }
       });
-
-      updateLogoutLink();
     </script>
   </body>
 </html>

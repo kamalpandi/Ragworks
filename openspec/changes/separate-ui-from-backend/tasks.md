@@ -44,7 +44,7 @@ Execution order: 2.1 → 2.4 → 2.5 → 2.3 → 2.7 → 2.2 → 2.6 (keep the t
 
 ## 5. Phase 4 — Remove legacy UI
 
-- [ ] 5.1 Delete the remaining `app/ui/**` (router + package) and update `main.py` / imports; verify the app starts with no references to `app.ui`
+- [x] 5.1 Delete the remaining `app/ui/**` (router + package) and update `main.py` / imports; verify the app starts with no references to `app.ui`. Done: `app/ui/` deleted, `ui_router` mount removed, docstrings refreshed; `import main` succeeds and only the architecture test's `BACKEND_FORBIDDEN` constant still names `app.ui` (intentional, now a no-op guard)
 - [ ] 5.2 Narrow `AuthMiddleware` to `/api/v1/*` only and remove the frontend-path exemptions (D3). **Apply only after every route is owned by `app.frontend` (4.3-4.10 + 5.1)**. Verify browser routes (`/`, `/ui/*`) are guarded by the frontend session layer and no longer intercepted by API-key middleware, while `/api/v1/*` still returns 401 without a key
 - [ ] 5.3 Remove all remaining `HX-Request` branches from the backend; verify `grep -R "HX-Request"` returns only frontend template usage, none in `app/api`
 - [ ] 5.4 Run `git status` to check whether the Phase 1 move left `app/templates`/`app/static` behind; if present, delete them along with orphaned partials; verify no dangling path references remain

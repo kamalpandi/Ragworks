@@ -81,6 +81,8 @@ async def login_submit(request: Request):
         secure=settings.SESSION_COOKIE_SECURE,
         path="/",
     )
+    # Clear the legacy browser-held key cookie left by pre-migration sessions.
+    redirect.delete_cookie("rag_api_key", path="/")
     return redirect
 
 
