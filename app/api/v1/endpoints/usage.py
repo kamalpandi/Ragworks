@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Query, Request
+from psycopg.rows import dict_row
 
 from app.core.pool import get_pool
 
@@ -18,7 +19,7 @@ async def get_usage(
     since = datetime.now(UTC) - timedelta(days=days)
 
     pool = get_pool()
-    async with pool.connection() as conn, conn.cursor() as cur:
+    async with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
         await cur.execute(
             "SELECT operation, COUNT(*) AS count, "
             "COALESCE(SUM(tokens_prompt), 0) AS total_prompt_tokens, "
