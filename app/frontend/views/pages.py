@@ -1,7 +1,7 @@
 """Page shells owned by the frontend.
 
-Shells render the layout; their fragment content still comes from the
-not-yet-migrated ``app/ui`` routes (different URLs) during the transition.
+Shells render the layout; their fragment content is loaded from frontend
+fragments, which in turn reach the backend over the JSON API.
 """
 
 from fastapi import APIRouter, Depends, Request

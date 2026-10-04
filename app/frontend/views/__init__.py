@@ -1,7 +1,7 @@
 """Frontend view routers.
 
-Routes are added here as domains migrate from ``app/ui`` (auth, pages,
-dashboard, config, ingest, query, prompts, observability, eval).
+Domain view routers (auth, pages, dashboard, config, ingest, query, prompts,
+observability, eval) are aggregated here.
 """
 
 from fastapi import APIRouter
