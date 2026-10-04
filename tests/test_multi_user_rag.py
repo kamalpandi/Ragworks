@@ -261,3 +261,29 @@ class TestUsageTracking:
         assert stats["ingest_count"] == 1
         assert stats["total_tokens"] == 150
         assert stats["chunks_created"] == 7
+
+    @pytest.mark.asyncio
+    async def test_query_only_aggregation(self, db):
+        tenant = "test-usage-query-only"
+        await _clear_usage(tenant)
+
+        await _seed_query(tenant, prompt=11, completion=4)
+
+        stats = await get_usage_stats(tenant)
+        assert stats["query_count"] == 1
+        assert stats["ingest_count"] == 0
+        assert stats["total_tokens"] == 15
+        assert stats["chunks_created"] == 0
+
+    @pytest.mark.asyncio
+    async def test_ingest_only_aggregation(self, db):
+        tenant = "test-usage-ingest-only"
+        await _clear_usage(tenant)
+
+        await _seed_ingest(tenant, chunks=42)
+
+        stats = await get_usage_stats(tenant)
+        assert stats["query_count"] == 0
+        assert stats["ingest_count"] == 1
+        assert stats["total_tokens"] == 0
+        assert stats["chunks_created"] == 42
