@@ -8,10 +8,15 @@ API; the UI layer no longer touches the database directly.
 from datetime import UTC, datetime
 
 from psycopg import Error as PsycopgError
+from psycopg.rows import dict_row
 
 from app.core.config import settings
 from app.core.pool import get_pool
 
+# Resilience boundary only: infrastructure failures degrade to zero-stats so the
+# dashboard still renders. Programming errors (TypeError, AttributeError,
+# KeyError) are intentionally NOT caught — they indicate bugs and must surface as
+# 500s rather than be silently swallowed into empty statistics.
 _DB_ERRORS = (PsycopgError, OSError, RuntimeError)
 
 
@@ -73,7 +78,7 @@ async def get_usage_stats(tenant_id: str, since: datetime | None = None) -> dict
 
     try:
         pool = get_pool()
-        async with pool.connection() as conn, conn.cursor() as cur:
+        async with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 "SELECT operation, COUNT(*) AS cnt, "
                 "COALESCE(SUM(tokens_prompt),0) + COALESCE(SUM(tokens_completion),0) AS tokens, "
