@@ -4,31 +4,8 @@ from fastapi.responses import HTMLResponse
 from app.components.loaders.pdf_loader import parse_pdf
 from app.components.loaders.web_loader import parse_url
 from app.core.dependencies import get_ingestion_service
-from app.ui import templates
 
 router = APIRouter()
-
-
-# --- HTMX Tab Form Providers ---
-@router.get("/ui/ingest/form/file", response_class=HTMLResponse)
-def get_file_form(request: Request):
-    return templates.TemplateResponse(
-        request=request, name="partials/ingest/file_form.html"
-    )
-
-
-@router.get("/ui/ingest/form/url", response_class=HTMLResponse)
-def get_url_form(request: Request):
-    return templates.TemplateResponse(
-        request=request, name="partials/ingest/url_form.html"
-    )
-
-
-@router.get("/ui/ingest/form/custom", response_class=HTMLResponse)
-def get_custom_form(request: Request):
-    return templates.TemplateResponse(
-        request=request, name="partials/ingest/custom_form.html"
-    )
 
 
 # --- HTMX Form Handlers ---

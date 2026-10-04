@@ -6,7 +6,7 @@ dashboard, config, ingest, query, prompts, observability, eval).
 
 from fastapi import APIRouter
 
-from app.frontend.views import auth, config, dashboard, pages
+from app.frontend.views import auth, config, dashboard, ingest, pages
 
 router = APIRouter()
 
@@ -14,3 +14,4 @@ router.include_router(auth.router)
 router.include_router(pages.router)
 router.include_router(dashboard.router)
 router.include_router(config.router)
+router.include_router(ingest.router)
