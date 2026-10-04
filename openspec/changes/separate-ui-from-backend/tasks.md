@@ -45,10 +45,10 @@ Execution order: 2.1 → 2.4 → 2.5 → 2.3 → 2.7 → 2.2 → 2.6 (keep the t
 ## 5. Phase 4 — Remove legacy UI
 
 - [x] 5.1 Delete the remaining `app/ui/**` (router + package) and update `main.py` / imports; verify the app starts with no references to `app.ui`. Done: `app/ui/` deleted, `ui_router` mount removed, docstrings refreshed; `import main` succeeds and only the architecture test's `BACKEND_FORBIDDEN` constant still names `app.ui` (intentional, now a no-op guard)
-- [ ] 5.2 Narrow `AuthMiddleware` to `/api/v1/*` only and remove the frontend-path exemptions (D3). **Apply only after every route is owned by `app.frontend` (4.3-4.10 + 5.1)**. Verify browser routes (`/`, `/ui/*`) are guarded by the frontend session layer and no longer intercepted by API-key middleware, while `/api/v1/*` still returns 401 without a key
-- [ ] 5.3 Remove all remaining `HX-Request` branches from the backend; verify `grep -R "HX-Request"` returns only frontend template usage, none in `app/api`
-- [ ] 5.4 Run `git status` to check whether the Phase 1 move left `app/templates`/`app/static` behind; if present, delete them along with orphaned partials; verify no dangling path references remain
-- [ ] 5.5 Update `AGENTS.md` architecture notes to describe the frontend/backend boundary and new endpoints; verify the doc matches the tree
+- [x] 5.2 Narrow `AuthMiddleware` to `/api/v1/*` only and remove the frontend-path exemptions (D3). **Apply only after every route is owned by `app.frontend` (4.3-4.10 + 5.1)**. Verify browser routes (`/`, `/ui/*`) are guarded by the frontend session layer and no longer intercepted by API-key middleware, while `/api/v1/*` still returns 401 without a key. Done: middleware passes non-`/api/v1` straight through; session bridge, `rag_api_key` cookie fallback, and HX/HTML-redirect branches removed; API always JSON `401`. Tests updated (browser routes now exercised through `require_session`; added API-only scope tests)
+- [x] 5.3 Remove all remaining `HX-Request` branches from the backend; verify `grep -R "HX-Request"` returns only frontend template usage, none in `app/api`. Done: no `HX-Request` and no `HX-*` anywhere in `app/api` (all such handling now lives in frontend templates/views)
+- [x] 5.4 Run `git status` to check whether the Phase 1 move left `app/templates`/`app/static` behind; if present, delete them along with orphaned partials; verify no dangling path references remain. Done: no legacy `app/templates`/`app/static`; working tree clean
+- [x] 5.5 Update `AGENTS.md` architecture notes to describe the frontend/backend boundary and new endpoints; verify the doc matches the tree. Done: replaced the dual-routed note with split frontend/backend, import wall, sessions/CSRF, and D13; removed `app/ui` references; added `APP_WORKERS=1`
 
 ## 6. Phase 5 — Verification
 
