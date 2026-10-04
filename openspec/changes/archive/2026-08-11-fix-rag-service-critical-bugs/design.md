@@ -72,7 +72,11 @@ Simplest fix: Skip queue for `stream()`. Use `asyncio.Lock` instead to serialize
 **Chosen**: Replace `"/query" in path` with explicit prefix checks:
 ```python
 def _is_query_path(path: str) -> bool:
-    return path in ("/api/v1/query",) or path.startswith("/api/v1/query/") or path == "/ui/query/chat"
+    return (
+        path in ("/api/v1/query",)
+        or path.startswith("/api/v1/query/")
+        or path == "/ui/query/chat"
+    )
 ```
 
 ### 9. Conditional thread_id generation

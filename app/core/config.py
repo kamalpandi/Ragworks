@@ -1,5 +1,5 @@
 import os
-from typing import List, Literal
+from typing import Literal
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = 2000
     LLM_N_CTX: int = 4000
     LLM_TOP_P: float = 0.9
-    LLM_STOP_SEQUENCES: List[str] = ["<|im_end|>", "<|im_start|>", " assistant"]
+    LLM_STOP_SEQUENCES: list[str] = ["<|im_end|>", "<|im_start|>", " assistant"]
 
     # Network Timeouts
     LLM_REMOTE_TIMEOUT: float = 60.0
@@ -101,7 +101,7 @@ class Settings(BaseSettings):
     # 5d. Evaluation
     # ==========================================
     EVAL_ENABLED: bool = True
-    EVAL_METRICS: List[str] = [
+    EVAL_METRICS: list[str] = [
         "context_precision",
         "context_recall",
         "faithfulness",
@@ -130,6 +130,12 @@ class Settings(BaseSettings):
     ADMIN_API_KEY: str = os.getenv("ADMIN_API_KEY", "admin-change-me")
     DEV_API_KEY: str = os.getenv("DEV_API_KEY", "")
 
+    # Frontend server-side sessions & CSRF
+    SESSION_COOKIE_NAME: str = "rag_session"
+    SESSION_TTL_SECONDS: int = 28800  # 8 hours
+    CSRF_HEADER_NAME: str = "X-CSRF-Token"
+    PRE_SESSION_TTL_SECONDS: int = 1800  # 30 minutes (login page)
+
     # ==========================================
     # 9. Rate Limiting
     # ==========================================
@@ -149,7 +155,7 @@ class Settings(BaseSettings):
     # 7. Dynamic File System Discovers
     # ==========================================
     @property
-    def AVAILABLE_LOCAL_MODELS(self) -> List[str]:
+    def AVAILABLE_LOCAL_MODELS(self) -> list[str]:
         try:
             if os.path.exists(self.MODELS_DIR):
                 return [f for f in os.listdir(self.MODELS_DIR) if f.endswith(".gguf")]

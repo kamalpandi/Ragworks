@@ -1,11 +1,12 @@
 import asyncio
-import uvicorn
 from contextlib import asynccontextmanager
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
+from psycopg import Error as PsycopgError
 
 from app.api.v1.api import api_router
 from app.core.config import settings
@@ -23,25 +24,35 @@ setup_logging()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown logic for background services."""
-    from app.core.pool import init_pool, close_pool
     from app.core.migrations import run_migrations
+    from app.core.pool import close_pool, init_pool
+    from app.frontend.api_client import BackendClient
+    from app.frontend.session import InMemorySessionStore
 
     await init_pool()
     try:
         await asyncio.to_thread(run_migrations)
-    except Exception:
+    except (PsycopgError, OSError) as exc:
         import logging
 
         logging.getLogger("rag_framework").critical(
             "migrations_failed — refusing to start with broken schema"
         )
-        raise RuntimeError("Database migrations failed") from None
+        raise RuntimeError("Database migrations failed") from exc
 
     if settings.OBSERVABILITY_ENABLED:
         from app.observability.log_store import log_store
 
         await log_store.start()
+
+    # Frontend reaches the backend only through this in-process client.
+    app.state.backend_client = BackendClient(app)
+    app.state.session_store = InMemorySessionStore(settings.SESSION_TTL_SECONDS)
+
     yield
+
+    await app.state.backend_client.aclose()
+
     if settings.OBSERVABILITY_ENABLED:
         from app.observability.log_store import log_store
 
@@ -58,7 +69,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="app/frontend/static"), name="static")
 
 app.add_middleware(AuthMiddleware)
 app.add_middleware(RateLimitMiddleware)
@@ -83,12 +94,11 @@ async def health():
         from app.core.pool import get_pool
 
         pool = get_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("SELECT 1")
-                await cur.fetchone()
+        async with pool.connection() as conn, conn.cursor() as cur:
+            await cur.execute("SELECT 1")
+            await cur.fetchone()
         db_status = "connected"
-    except Exception:
+    except (PsycopgError, OSError, RuntimeError):
         db_status = "disconnected"
     return {
         "status": "healthy" if db_status == "connected" else "degraded",

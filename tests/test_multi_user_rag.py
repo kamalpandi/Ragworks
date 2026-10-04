@@ -14,7 +14,6 @@ class TestMultiTenancy:
     @pytest.mark.asyncio
     async def test_cross_tenant_isolation(self):
         """Tenant A and Tenant B should not see each other's data."""
-        pass
 
 
 class TestApiAuthentication:
@@ -37,7 +36,6 @@ class TestApiAuthentication:
     @pytest.mark.asyncio
     async def test_exempt_paths_accessible(self):
         """Metrics, docs, openapi.json, health should be accessible without auth."""
-        pass
 
 
 class TestRateLimiting:
@@ -62,6 +60,7 @@ class TestLLMQueue:
     @pytest.mark.asyncio
     async def test_queue_serializes_concurrent_calls(self):
         queue = LLMRequestQueue()
+        await queue.start()
         order = []
 
         async def task_a():
@@ -84,11 +83,13 @@ class TestLLMQueue:
         assert a == "a"
         assert b == "b"
         assert order == ["a_start", "a_end", "b_start", "b_end"]
+        await queue.stop()
 
     @pytest.mark.asyncio
     async def test_queue_respects_timeout(self):
         settings.LLM_QUEUE_TIMEOUT_SECONDS = 0.1
         queue = LLMRequestQueue()
+        await queue.start()
 
         async def slow_task():
             await asyncio.sleep(1)
@@ -109,7 +110,7 @@ class TestLLMQueue:
         assert result == "fast"
 
         r2.cancel()
-        queue.stop()
+        await queue.stop()
 
 
 class TestConversationMemory:

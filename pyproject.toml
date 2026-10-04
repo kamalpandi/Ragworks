@@ -40,10 +40,40 @@ dependencies = [
     # Evaluation
     "ragas>=0.3.0",
     "rouge-score>=0.1.2",
+    "httpx>=0.28.1",
 ]
 
 [tool.pyrefly]
 project-includes = [
     "**/*.py*",
     "**/*.ipynb",
+]
+
+[tool.ruff]
+extend-exclude = ["scripts/emails/test_data"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI dependency/parameter idioms: Depends/File/Query in defaults (B008)
+# and deliberate re-raises in handlers (B904).
+"app/api/**" = ["B008", "B904"]
+# The eval background job intentionally records any failure on the job.
+"app/api/v1/endpoints/eval.py" = ["BLE001"]
+# Legacy HTMX UI layer, replaced by app/frontend and deleted in Phase 4.
+"app/ui/**" = ["B008", "BLE001", "S110", "SIM117"]
+# Standalone demo/consumer scripts, not application runtime.
+"scripts/**" = ["ISC004", "ASYNC230", "ASYNC251"]
+# Best-effort resilience boundaries: telemetry, metrics, and provider calls
+# intentionally catch broadly so failures never break the request path.
+"app/observability/log_store.py" = ["BLE001"]
+"app/observability/logger.py" = ["BLE001", "S110"]
+"app/services/usage_tracker.py" = ["BLE001"]
+"app/services/llm_queue.py" = ["BLE001"]
+"app/components/llms/llamacpp_llm.py" = ["BLE001"]
+"app/components/loaders/web_loader.py" = ["BLE001"]
+"app/evaluation/metrics/**" = ["BLE001"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
 ]

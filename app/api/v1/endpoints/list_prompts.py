@@ -17,10 +17,25 @@ class PromptSaveRequest(BaseModel):
 
 
 @router.get("", summary="List all discoverable system and user prompts")
-async def list_prompts():
+async def list_prompts(include_content: bool = False):
+    system_prompts = get_available_prompts("system")
+    user_prompts = get_available_prompts("user")
+
+    if include_content:
+        return {
+            "system_prompts": [
+                {"name": name, "content": load_prompt(name, "system")}
+                for name in system_prompts
+            ],
+            "user_prompts": [
+                {"name": name, "content": load_prompt(name, "user")}
+                for name in user_prompts
+            ],
+        }
+
     return {
-        "system_prompts": get_available_prompts("system"),
-        "user_prompts": get_available_prompts("user"),
+        "system_prompts": system_prompts,
+        "user_prompts": user_prompts,
     }
 
 

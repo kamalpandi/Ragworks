@@ -2,18 +2,24 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     admin,
+    auth,
     config,
     conversations,
-    eval as eval_endpoints,
+    dashboard,
     ingest,
     list_prompts,
     logs,
     query,
     usage,
 )
+from app.api.v1.endpoints import (
+    eval as eval_endpoints,
+)
 
 api_router = APIRouter()
 
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(dashboard.router, tags=["Dashboard"])
 api_router.include_router(ingest.router, prefix="/ingest", tags=["Ingestion"])
 api_router.include_router(query.router, prefix="/query", tags=["Retrieval"])
 api_router.include_router(config.router, prefix="/config", tags=["Configuration"])
