@@ -1,4 +1,6 @@
-{% if entries %}
+{% if error %}
+<p><em style="color: var(--pico-del-color)">Could not load logs.</em></p>
+{% elif entries %}
 <table class="striped">
   <thead>
     <tr>

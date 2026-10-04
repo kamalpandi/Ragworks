@@ -10,7 +10,9 @@
       >Refresh</button>
     </div>
   </header>
-  {% if stats.enabled %}
+  {% if error %}
+  <p><em style="color: var(--pico-del-color)">Could not load log statistics.</em></p>
+  {% elif stats.enabled %}
   <table class="striped">
     <tbody>
       <tr>
