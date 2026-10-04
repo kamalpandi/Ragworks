@@ -167,3 +167,43 @@ async def ui_eval_delete_result(
     if resp.status_code >= 400:
         return _eval_error(request, resp)
     return await _results_response(request, session, client)
+
+
+@router.get("/ui/eval/compare", response_class=HTMLResponse)
+async def ui_eval_compare(
+    request: Request,
+    id_a: str = "",
+    id_b: str = "",
+    session=Depends(require_session),
+):
+    client = get_backend_client(request)
+    resp = await client.get("/api/v1/eval/results", api_key=session.api_key)
+    if resp.status_code >= 400:
+        logger.warning("eval_compare_list_failed status=%s", resp.status_code)
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/error_banner.html",
+            context={"title": "Could not load results:", "message": _detail(resp)},
+        )
+    results = resp.json()
+
+    comparison = None
+    if id_a and id_b:
+        cmp_resp = await client.post(
+            "/api/v1/eval/compare",
+            params={"id_a": id_a, "id_b": id_b},
+            api_key=session.api_key,
+        )
+        if cmp_resp.status_code < 400:
+            comparison = cmp_resp.json().get("comparison")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/eval_compare.html",
+        context={
+            "results": results,
+            "id_a": id_a,
+            "id_b": id_b,
+            "comparison": comparison,
+        },
+    )
