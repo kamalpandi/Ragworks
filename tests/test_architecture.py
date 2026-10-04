@@ -29,7 +29,7 @@ BACKEND_DIRS = [
     "app/observability",
     "app/middleware",
 ]
-BACKEND_FORBIDDEN = ("jinja2", "starlette.templating", "app.frontend")
+BACKEND_FORBIDDEN = ("jinja2", "starlette.templating", "app.frontend", "app.ui")
 
 
 def iter_imports(path: Path):
@@ -100,6 +100,6 @@ def test_scanner_allows_shared_config(tmp_path):
     assert frontend_violations(pkg) == []
 
 
-def test_backend_imports_no_templating():
+def test_backend_imports_no_templating_or_ui():
     violations = backend_violations()
-    assert violations == [], f"backend imports templating/frontend: {violations}"
+    assert violations == [], f"backend imports templating/frontend/ui: {violations}"
