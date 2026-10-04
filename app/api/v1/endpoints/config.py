@@ -47,6 +47,7 @@ async def get_frontend_config(request: Request):
             LOG_LEVEL=settings.LOG_LEVEL,
             LOG_FORMAT=settings.LOG_FORMAT,
             OTEL_EXPORTER_TYPE=settings.OTEL_EXPORTER_TYPE,
+            OTEL_EXPORTER_ENDPOINT=settings.OTEL_EXPORTER_ENDPOINT,
             EVAL_ENABLED=settings.EVAL_ENABLED,
             EVAL_METRICS=settings.EVAL_METRICS,
             EVAL_RESULTS_DIR=settings.EVAL_RESULTS_DIR,

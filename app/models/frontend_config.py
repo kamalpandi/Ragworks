@@ -54,6 +54,7 @@ class FrontendConfig(BaseModel):
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"]
     LOG_FORMAT: Literal["json", "console"]
     OTEL_EXPORTER_TYPE: Literal["otlp", "console", "none"]
+    OTEL_EXPORTER_ENDPOINT: str
 
     # Evaluation
     EVAL_ENABLED: bool
