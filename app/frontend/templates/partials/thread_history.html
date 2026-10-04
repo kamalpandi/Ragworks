@@ -1,0 +1,19 @@
+{% if unavailable %}
+<p style="color: var(--pico-muted-color); text-align: center; padding: 2rem">
+  Could not load conversation.
+</p>
+{% elif not messages %}
+<p style="color: var(--pico-muted-color); text-align: center; padding: 2rem">
+  Empty conversation.
+</p>
+{% else %} {% for msg in messages %} {% if msg.role == "user" %}
+<article style="margin-bottom: 0.5rem">
+  <header><small>You</small></header>
+  <p>{{ msg.content }}</p>
+</article>
+{% else %}
+<article style="margin-bottom: 0.5rem">
+  <header><small>Assistant</small></header>
+  <div class="markdown-body">{{ msg.html|safe }}</div>
+</article>
+{% endif %} {% endfor %} {% endif %}

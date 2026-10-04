@@ -5,7 +5,6 @@ from fastapi.responses import HTMLResponse
 from app.components.query_translation.enricher import enrich_query
 from app.core.dependencies import get_rag_engine
 from app.core.prompt_loader import load_prompt
-from app.services.conversation_service import get_thread
 from app.ui import templates
 
 router = APIRouter()
@@ -70,31 +69,3 @@ async def ui_chat(
         if "Remote LLM Server returned error status 400" in error_msg:
             return "<article style='border-color: red;'><strong>Context Window Exceeded:</strong> The combined length of your question and the retrieved documentation is too large.</article>"
         return f"<article style='border-color: red;'><strong>Internal Error:</strong> {error_msg}</article>"
-
-
-@router.get("/ui/query/thread/{thread_id}", response_class=HTMLResponse)
-async def load_thread(request: Request, thread_id: str):
-    tenant_id = getattr(request.state, "tenant_id", "default")
-    try:
-        thread = await get_thread(tenant_id, thread_id)
-    except Exception:
-        return "<p style='color:var(--pico-muted-color);text-align:center;padding:2rem;'>Could not load conversation.</p>"
-
-    if not thread.messages:
-        return "<p style='color:var(--pico-muted-color);text-align:center;padding:2rem;'>Empty conversation.</p>"
-
-    html_parts = []
-    for msg in thread.messages:
-        if msg.role == "user":
-            html_parts.append(
-                f'<article style="margin-bottom:0.5rem;"><header><small>You</small></header>'
-                f"<p>{msg.content}</p></article>"
-            )
-        else:
-            html_answer = markdown.markdown(msg.content)
-            html_parts.append(
-                f'<article style="margin-bottom:0.5rem;"><header><small>Assistant</small></header>'
-                f'<div class="markdown-body">{html_answer}</div></article>'
-            )
-
-    return "\n".join(html_parts)
