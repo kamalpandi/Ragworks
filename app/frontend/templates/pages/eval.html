@@ -5,6 +5,8 @@
     <p>Run RAG quality benchmarks and compare results</p>
   </hgroup>
 
+  <div id="eval-error" role="alert"></div>
+
   <article>
     <header>Available Metrics</header>
     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem">
@@ -17,7 +19,7 @@
   <article>
     <header>Run Evaluation from HuggingFace Dataset</header>
     <form
-      hx-post="/api/v1/eval/run"
+      hx-post="/ui/eval/run"
       hx-target="#eval-run-area"
       hx-swap="innerHTML"
       hx-indicator="#eval-run-spinner"

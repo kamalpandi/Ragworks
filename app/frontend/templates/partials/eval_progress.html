@@ -1,0 +1,29 @@
+<div
+  id="eval-run-status"
+  {% if status == "running" %}hx-get="/ui/eval/progress/{{ run_id }}" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}
+>
+  {% if status == "error" %}
+  <article style="border-color: var(--pico-del-color)">
+    <header><strong>Evaluation failed</strong></header>
+    <p>{{ error or "The evaluation run failed." }}</p>
+  </article>
+  {% elif status == "done" %}
+  <article style="border-color: var(--pico-ins-color)">
+    <header><strong>Evaluation complete</strong></header>
+    <p>{{ num_samples }} samples evaluated.</p>
+    {% if aggregated_scores %}
+    <ul>
+      {% for name, val in aggregated_scores.items() %}
+      <li><small>{{ name }}</small> <strong>{{ "%.4f"|format(val) }}</strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+  {% else %}
+  <article aria-busy="true">
+    <header><strong>Evaluation running…</strong></header>
+    <p>Processed {{ current }} / {{ total }}</p>
+    <progress value="{{ current }}" max="{{ total or 1 }}"></progress>
+  </article>
+  {% endif %}
+</div>

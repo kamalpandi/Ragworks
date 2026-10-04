@@ -10,6 +10,7 @@ from app.frontend.views import (
     auth,
     config,
     dashboard,
+    eval,
     ingest,
     observability,
     pages,
@@ -25,3 +26,4 @@ router.include_router(config.router)
 router.include_router(ingest.router)
 router.include_router(query.router)
 router.include_router(observability.router)
+router.include_router(eval.router)
