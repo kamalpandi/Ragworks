@@ -8,27 +8,6 @@ from app.ui import templates
 router = APIRouter()
 
 
-@router.get("/ui/eval/results", response_class=HTMLResponse)
-def htmx_eval_results(request: Request):
-    results = EvalResult.list_results(settings.EVAL_RESULTS_DIR)
-    results_data = [
-        {
-            "id": r.id,
-            "timestamp": r.timestamp,
-            "dataset_name": r.dataset_name,
-            "num_samples": r.num_samples,
-            "aggregated_scores": r.aggregated_scores,
-            "thread_label": r.thread_label,
-        }
-        for r in results
-    ]
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/eval_results.html",
-        context={"results": results_data},
-    )
-
-
 @router.get("/ui/eval/compare", response_class=HTMLResponse)
 def htmx_compare_form(request: Request, id_a: str = "", id_b: str = ""):
     results = EvalResult.list_results(settings.EVAL_RESULTS_DIR)

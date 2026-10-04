@@ -36,11 +36,10 @@
       <td>
         <button
           style="font-size: 0.7rem; padding: 0.15rem 0.5rem; margin: 0; background: var(--pico-del-color); border-color: var(--pico-del-color);"
-          hx-delete="/api/v1/eval/results/{{ r.id }}"
+          hx-delete="/ui/eval/results/{{ r.id }}"
           hx-target="#eval-results"
           hx-swap="innerHTML"
           hx-confirm="Delete result {{ r.id }}?"
-          hx-get="/ui/eval/results"
         >
           Delete
         </button>

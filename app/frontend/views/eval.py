@@ -129,3 +129,41 @@ async def ui_eval_progress(
         num_samples=data.get("num_samples", 0),
         aggregated_scores=data.get("aggregated_scores", {}),
     )
+
+
+async def _results_response(request: Request, session, client):
+    resp = await client.get("/api/v1/eval/results", api_key=session.api_key)
+    if resp.status_code >= 400:
+        logger.warning("eval_results_failed status=%s", resp.status_code)
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/error_banner.html",
+            context={
+                "title": "Could not load results:",
+                "message": _detail(resp),
+            },
+        )
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/eval_results.html",
+        context={"results": resp.json()},
+    )
+
+
+@router.get("/ui/eval/results", response_class=HTMLResponse)
+async def ui_eval_results(request: Request, session=Depends(require_session)):
+    return await _results_response(request, session, get_backend_client(request))
+
+
+@router.delete("/ui/eval/results/{result_id}", response_class=HTMLResponse)
+async def ui_eval_delete_result(
+    request: Request, result_id: str, session=Depends(require_session)
+):
+    verify_session_csrf(request, session)
+    client = get_backend_client(request)
+    resp = await client.delete(
+        f"/api/v1/eval/results/{result_id}", api_key=session.api_key
+    )
+    if resp.status_code >= 400:
+        return _eval_error(request, resp)
+    return await _results_response(request, session, client)
