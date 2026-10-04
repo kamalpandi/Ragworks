@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -12,7 +14,9 @@ router = APIRouter()
 
 
 class PromptSaveRequest(BaseModel):
-    category: str = Field(..., description="'system' or 'user'")
+    category: Literal["system", "user"] = Field(
+        ..., description="'system' or 'user'"
+    )
     content: str = Field(..., description="Markdown content of the prompt")
 
 
@@ -40,7 +44,7 @@ async def list_prompts(include_content: bool = False):
 
 
 @router.get("/{name}", summary="Get a single prompt with its content")
-async def get_prompt(name: str, category: str = "system"):
+async def get_prompt(name: str, category: Literal["system", "user"] = "system"):
     content = load_prompt(name, category)
     if not content:
         raise HTTPException(status_code=404, detail=f"Prompt '{name}' not found")
@@ -58,7 +62,7 @@ async def upsert_prompt(name: str, body: PromptSaveRequest):
 
 
 @router.delete("/{name}", summary="Delete a prompt")
-async def remove_prompt(name: str, category: str = "system"):
+async def remove_prompt(name: str, category: Literal["system", "user"] = "system"):
     if name == "default" and category == "system":
         raise HTTPException(
             status_code=403, detail="Cannot delete the default system prompt"

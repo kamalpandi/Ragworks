@@ -1,8 +1,17 @@
 from pathlib import Path
 
+_VALID_CATEGORIES = {"system", "user"}
+
 
 def _sanitize_name(name: str) -> str:
     return Path(name).name
+
+
+def _safe_category(category: str) -> str:
+    """Reject categories that could escape the prompts directory."""
+    if category not in _VALID_CATEGORIES:
+        raise ValueError(f"Invalid prompt category: {category!r}")
+    return category
 
 
 def load_prompt(name: str, category: str = "system") -> str:
@@ -11,7 +20,7 @@ def load_prompt(name: str, category: str = "system") -> str:
     Falls back to 'default.md' if the specified file does not exist.
     """
     name = _sanitize_name(name)
-    base_dir = Path(f"app/prompts/{category}")
+    base_dir = Path(f"app/prompts/{_safe_category(category)}")
     target_path = base_dir / f"{name}.md"
 
     if target_path.exists():
@@ -26,7 +35,7 @@ def load_prompt(name: str, category: str = "system") -> str:
 
 def save_prompt(name: str, content: str, category: str = "system") -> None:
     name = _sanitize_name(name)
-    base_dir = Path(f"app/prompts/{category}")
+    base_dir = Path(f"app/prompts/{_safe_category(category)}")
     base_dir.mkdir(parents=True, exist_ok=True)
     target_path = base_dir / f"{name}.md"
     target_path.write_text(content, encoding="utf-8")
@@ -34,7 +43,7 @@ def save_prompt(name: str, content: str, category: str = "system") -> None:
 
 def delete_prompt(name: str, category: str = "system") -> bool:
     name = _sanitize_name(name)
-    target_path = Path(f"app/prompts/{category}") / f"{name}.md"
+    target_path = Path(f"app/prompts/{_safe_category(category)}") / f"{name}.md"
     if not target_path.exists():
         return False
     target_path.unlink()
@@ -46,7 +55,7 @@ def get_available_prompts(category: str = "system") -> list[str]:
     Scans the prompt directory and returns a clean list of available .md names.
     Perfect for populating the front-end dropdown menu.
     """
-    dir_path = Path(f"app/prompts/{category}")
+    dir_path = Path(f"app/prompts/{_safe_category(category)}")
     if not dir_path.exists():
         return []
 
