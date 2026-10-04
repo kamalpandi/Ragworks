@@ -88,3 +88,18 @@ async def ui_ingest_url(
         return _handle_failure(resp, "Could not extract text from URL.")
     data = resp.json()
     return _ok(f"URL extraction for '{data.get('url') or url}' started!")
+
+
+@router.post("/ui/ingest/custom")
+async def ui_ingest_custom(
+    request: Request,
+    text: str = Form(...),
+    session=Depends(require_session),
+):
+    verify_session_csrf(request, session)
+    resp = await get_backend_client(request).post(
+        "/api/v1/ingest/custom", api_key=session.api_key, json={"texts": [text]}
+    )
+    if resp.status_code >= 400:
+        return _handle_failure(resp, "Custom text ingestion failed.")
+    return _ok("Custom text successfully ingested!")

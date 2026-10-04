@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Request, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Request, UploadFile
 from fastapi.responses import HTMLResponse
 
 from app.components.loaders.pdf_loader import parse_pdf
@@ -38,14 +38,3 @@ async def ui_ingest_file(
         tenant_id=tenant_id,
     )
     return f"<span style='color: var(--pico-ins-color);'>'{file.filename}' queued for background processing!</span>"
-
-
-@router.post("/ui/ingest/custom", response_class=HTMLResponse)
-async def ui_ingest_custom(
-    request: Request,
-    text: str = Form(...),
-    service=Depends(get_ingestion_service),
-):
-    tenant_id = getattr(request.state, "tenant_id", "default")
-    await service.ingest_texts([text], source_name="manual_upload", tenant_id=tenant_id)
-    return "<span style='color: var(--pico-ins-color);'>Custom text successfully ingested!</span>"
