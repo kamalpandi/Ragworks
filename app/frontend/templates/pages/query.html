@@ -127,6 +127,7 @@
     </div>
 
     <div>
+      <div id="chat-error" role="alert"></div>
       <form
         id="chat-form"
         hx-post="/ui/query/chat"
@@ -218,6 +219,14 @@
     if (e.detail.target.id === "conversation-thread") {
       var container = document.getElementById("conversation-thread");
       container.scrollTop = container.scrollHeight;
+    }
+  });
+
+  document.body.addEventListener("htmx:beforeRequest", function (e) {
+    var elt = e.detail.elt;
+    if (elt && elt.id === "chat-form") {
+      var err = document.getElementById("chat-error");
+      if (err) err.innerHTML = "";
     }
   });
 </script>

@@ -4,12 +4,10 @@ from app.ui import (
     eval_ui,
     observability,
     prompts,
-    query,
 )
 
 ui_router = APIRouter()
 
-ui_router.include_router(query.router, tags=["UI Query"])
 ui_router.include_router(prompts.router, tags=["UI Prompts"])
 ui_router.include_router(observability.router, tags=["UI Observability"])
 ui_router.include_router(eval_ui.router, tags=["UI Evaluation"])
