@@ -87,3 +87,33 @@ async def dashboard_docs(request: Request, session=Depends(require_session)):
         name="partials/dashboard_docs.html",
         context={"sources": data["sources"], "count": data["count"]},
     )
+
+
+@router.get("/ui/dashboard/stats")
+async def dashboard_stats(request: Request, session=Depends(require_session)):
+    client = get_backend_client(request)
+    key = session.api_key
+    dash = (await client.get("/api/v1/dashboard", api_key=key)).json()
+    cfg = (await client.get("/api/v1/config", api_key=key)).json()
+    stats = dash["stats"]
+    config = cfg["config"]
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/dashboard_stats.html",
+        context={
+            "query_count": stats["query_count"],
+            "ingest_count": stats["ingest_count"],
+            "total_tokens": stats["total_tokens"],
+            "chunks_created": stats["chunks_created"],
+            "chunking_strategy": config["CHUNKING_STRATEGY"],
+            "top_k": config["TOP_K"],
+            "retrieval_top_k": config["RETRIEVAL_TOP_K"],
+            "reranker_enabled": config["RERANKER_ENABLED"],
+            "reranker_provider": config["RERANKER_PROVIDER"],
+            "embedding_model": config["EMBEDDING_MODEL"],
+            "embedding_dimension": config["EMBEDDING_DIMENSION"],
+            "system_prompt": config["SYSTEM_PROMPT_FILE"],
+            "rate_limit_enabled": config["RATE_LIMIT_ENABLED"],
+            "tenant_id": cfg["tenant_id"],
+        },
+    )
