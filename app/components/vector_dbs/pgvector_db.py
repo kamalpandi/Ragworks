@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pgvector.psycopg import register_vector
 from psycopg.rows import dict_row
@@ -65,28 +65,27 @@ class PGVectorDB(BaseVectorDB):
 
     async def upsert(
         self,
-        chunks: List[DocumentChunk],
-        embeddings: List[List[float]],
+        chunks: list[DocumentChunk],
+        embeddings: list[list[float]],
         tenant_id: str = "default",
     ):
         if len(chunks) != len(embeddings):
             raise ValueError("Number of chunks and embeddings must match!")
 
         pool = get_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                data = [
-                    (
-                        chunk.id,
-                        chunk.text,
-                        chunk.metadata.get("tenant_id", "default"),
-                        json.dumps(chunk.metadata),
-                        embedding,
-                    )
-                    for chunk, embedding in zip(chunks, embeddings)
-                ]
-                await cur.executemany(
-                    SQL("""
+        async with pool.connection() as conn, conn.cursor() as cur:
+            data = [
+                (
+                    chunk.id,
+                    chunk.text,
+                    chunk.metadata.get("tenant_id", "default"),
+                    json.dumps(chunk.metadata),
+                    embedding,
+                )
+                for chunk, embedding in zip(chunks, embeddings)
+            ]
+            await cur.executemany(
+                SQL("""
                         INSERT INTO {table} (id, text, tenant_id, metadata, embedding)
                         VALUES (%s, %s, %s, %s, %s)
                         ON CONFLICT (id) DO UPDATE
@@ -95,78 +94,76 @@ class PGVectorDB(BaseVectorDB):
                             metadata = EXCLUDED.metadata,
                             embedding = EXCLUDED.embedding
                     """).format(table=Identifier(self.table_name)),
-                    data,
-                )
+                data,
+            )
 
-    async def get_distinct_sources(self, tenant_id: str = "default") -> List[str]:
+    async def get_distinct_sources(self, tenant_id: str = "default") -> list[str]:
         pool = get_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor(row_factory=dict_row) as cur:
-                await cur.execute(
-                    SQL(
-                        "SELECT DISTINCT metadata->>'source' AS source FROM {table} WHERE tenant_id = %s ORDER BY source"
-                    ).format(table=Identifier(self.table_name)),
-                    [tenant_id],
-                )
-                rows = await cur.fetchall()
-                return [str(row["source"]) for row in rows if row.get("source")]
+        async with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                SQL(
+                    "SELECT DISTINCT metadata->>'source' AS source FROM {table} WHERE tenant_id = %s ORDER BY source"
+                ).format(table=Identifier(self.table_name)),
+                [tenant_id],
+            )
+            rows = await cur.fetchall()
+            return [str(row["source"]) for row in rows if row.get("source")]
 
     async def search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         top_k: int,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: dict[str, Any] | None = None,
         tenant_id: str = "default",
-    ) -> List[DocumentChunk]:
+    ) -> list[DocumentChunk]:
         pool = get_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor(row_factory=dict_row) as cur:
-                if filters and "source" in filters:
-                    source_file = filters["source"].get("$eq")
-                    if source_file:
-                        final_query = SQL("""
-                            SELECT id, text, metadata, 1 - (embedding <=> %s::vector) AS score
-                            FROM {table}
-                            WHERE tenant_id = %s AND metadata->>'source' = %s
-                            ORDER BY embedding <=> %s::vector
-                            LIMIT %s
-                        """).format(table=Identifier(self.table_name))
-                        params = [
-                            query_vector,
-                            tenant_id,
-                            source_file,
-                            query_vector,
-                            top_k,
-                        ]
-                        await cur.execute(final_query, params)
-                        rows = await cur.fetchall()
-                        return [
-                            DocumentChunk(
-                                id=str(row["id"]),
-                                text=str(row["text"]),
-                                metadata=row["metadata"],
-                                score=float(row["score"]),
-                            )
-                            for row in rows
-                        ]
+        async with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            if filters and "source" in filters:
+                source_file = filters["source"].get("$eq")
+                if source_file:
+                    final_query = SQL("""
+                        SELECT id, text, metadata, 1 - (embedding <=> %s::vector) AS score
+                        FROM {table}
+                        WHERE tenant_id = %s AND metadata->>'source' = %s
+                        ORDER BY embedding <=> %s::vector
+                        LIMIT %s
+                    """).format(table=Identifier(self.table_name))
+                    params = [
+                        query_vector,
+                        tenant_id,
+                        source_file,
+                        query_vector,
+                        top_k,
+                    ]
+                    await cur.execute(final_query, params)
+                    rows = await cur.fetchall()
+                    return [
+                        DocumentChunk(
+                            id=str(row["id"]),
+                            text=str(row["text"]),
+                            metadata=row["metadata"],
+                            score=float(row["score"]),
+                        )
+                        for row in rows
+                    ]
 
-                final_query = SQL("""
-                    SELECT id, text, metadata, 1 - (embedding <=> %s::vector) AS score
-                    FROM {table}
-                    WHERE tenant_id = %s
-                    ORDER BY embedding <=> %s::vector
-                    LIMIT %s
-                """).format(table=Identifier(self.table_name))
-                params = [query_vector, tenant_id, query_vector, top_k]
-                await cur.execute(final_query, params)
-                rows = await cur.fetchall()
+            final_query = SQL("""
+                SELECT id, text, metadata, 1 - (embedding <=> %s::vector) AS score
+                FROM {table}
+                WHERE tenant_id = %s
+                ORDER BY embedding <=> %s::vector
+                LIMIT %s
+            """).format(table=Identifier(self.table_name))
+            params = [query_vector, tenant_id, query_vector, top_k]
+            await cur.execute(final_query, params)
+            rows = await cur.fetchall()
 
-                return [
-                    DocumentChunk(
-                        id=str(row["id"]),
-                        text=str(row["text"]),
-                        metadata=row["metadata"],
-                        score=float(row["score"]),
-                    )
-                    for row in rows
-                ]
+            return [
+                DocumentChunk(
+                    id=str(row["id"]),
+                    text=str(row["text"]),
+                    metadata=row["metadata"],
+                    score=float(row["score"]),
+                )
+                for row in rows
+            ]

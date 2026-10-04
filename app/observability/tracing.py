@@ -1,6 +1,7 @@
 import functools
+from collections.abc import Callable
 from contextlib import contextmanager
-from typing import Any, Callable
+from typing import Any
 
 from app.core.config import settings
 
@@ -42,7 +43,6 @@ def init_tracing(service_name: str = "rag-framework"):
 
 
 def get_tracer():
-    global _tracer
     if _tracer is None and settings.OBSERVABILITY_ENABLED:
         init_tracing()
     return _tracer

@@ -1,7 +1,8 @@
 import asyncio
 import json
 import os
-from typing import TYPE_CHECKING, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 import httpx
 from langchain_community.llms.llamacpp import LlamaCpp
@@ -185,20 +186,22 @@ class LlamaCppProvider(BaseLLMProvider):
                 "stop": self.stop_sequences,
                 "stream": True,
             }
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                async with client.stream(
+            async with (
+                httpx.AsyncClient(timeout=self.timeout) as client,
+                client.stream(
                     "POST", f"{self.remote_url}/completion", json=payload
-                ) as response:
-                    response.raise_for_status()
-                    async for line in response.aiter_lines():
-                        if line.startswith("data: "):
-                            try:
-                                chunk_data = json.loads(line[6:])
-                                content = chunk_data.get("content", "")
-                                if content:
-                                    yield content
-                            except json.JSONDecodeError:
-                                continue
+                ) as response,
+            ):
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if line.startswith("data: "):
+                        try:
+                            chunk_data = json.loads(line[6:])
+                            content = chunk_data.get("content", "")
+                            if content:
+                                yield content
+                        except json.JSONDecodeError:
+                            continue
             return
 
         # --- LOCAL PATH ---

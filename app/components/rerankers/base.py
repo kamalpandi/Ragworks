@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from app.models.domain import DocumentChunk
 
@@ -9,7 +8,6 @@ class BaseReranker(ABC):
 
     @abstractmethod
     async def rerank(
-        self, query: str, chunks: List[DocumentChunk], top_n: int
-    ) -> List[DocumentChunk]:
+        self, query: str, chunks: list[DocumentChunk], top_n: int
+    ) -> list[DocumentChunk]:
         """Re-rank chunks and return top_n most relevant."""
-        pass

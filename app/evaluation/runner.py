@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional
+from collections.abc import Callable
 
 from app.core.config import settings
 from app.evaluation.base import BaseMetric
@@ -11,8 +11,8 @@ class EvaluationRunner:
     def __init__(
         self,
         rag_engine,
-        metric_names: Optional[List[str]] = None,
-        progress_callback: Optional[Callable[[int, int], None]] = None,
+        metric_names: list[str] | None = None,
+        progress_callback: Callable[[int, int], None] | None = None,
     ):
         self.rag_engine = rag_engine
         self.metric_names = metric_names or settings.EVAL_METRICS
@@ -20,12 +20,12 @@ class EvaluationRunner:
 
     async def run(
         self,
-        entries: List[DatasetEntry],
+        entries: list[DatasetEntry],
         dataset_name: str = "custom",
-        file_filter: Optional[str] = None,
+        file_filter: str | None = None,
     ) -> EvalResult:
-        metrics: List[BaseMetric] = [get_metric(name) for name in self.metric_names]
-        all_scores: Dict[str, List[float]] = {m.name: [] for m in metrics}
+        metrics: list[BaseMetric] = [get_metric(name) for name in self.metric_names]
+        all_scores: dict[str, list[float]] = {m.name: [] for m in metrics}
         total = len(entries)
 
         for i, entry in enumerate(entries):

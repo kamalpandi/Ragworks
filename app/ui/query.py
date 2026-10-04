@@ -1,5 +1,3 @@
-from typing import Optional
-
 import markdown
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
@@ -36,12 +34,12 @@ async def query_page(request: Request, vector_db=Depends(get_vector_db)):
 async def ui_chat(
     request: Request,
     message: str = Form(...),
-    file_name: Optional[str] = Form(None),
-    translation_strategy: Optional[str] = Form(None),
-    prompt_name: Optional[str] = Form(None),
-    thread_id: Optional[str] = Form(None),
+    file_name: str | None = Form(None),
+    translation_strategy: str | None = Form(None),
+    prompt_name: str | None = Form(None),
+    thread_id: str | None = Form(None),
     engine=Depends(get_rag_engine),
-    custom_prompt: Optional[str] = Form(None),
+    custom_prompt: str | None = Form(None),
 ):
     # 1. HTML Forms send empty strings instead of None, so we clean them up
     strategy = (

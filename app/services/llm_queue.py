@@ -1,5 +1,6 @@
 import asyncio
-from typing import Any, Callable, Coroutine
+from collections.abc import Callable, Coroutine
+from typing import Any
 
 from app.core.config import settings
 from app.observability.logger import get_logger
@@ -36,7 +37,7 @@ class LLMRequestQueue:
 
         try:
             return await asyncio.wait_for(future, timeout=self._timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             rag_llm_queue_timeout_total.inc()
             logger.warning("llm_queue_timeout", timeout_s=self._timeout)
             raise

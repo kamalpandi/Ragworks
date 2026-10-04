@@ -1,7 +1,6 @@
 import json
 import os
-from datetime import datetime, timezone
-from typing import List
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
@@ -14,12 +13,10 @@ class MetricScore(BaseModel):
 
 class EvalResult(BaseModel):
     id: str = Field(default_factory=lambda: os.urandom(8).hex())
-    timestamp: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     dataset_name: str
     num_samples: int
-    metrics: List[MetricScore]
+    metrics: list[MetricScore]
     aggregated_scores: dict[str, float] = Field(default_factory=dict)
     config_snapshot: dict[str, object] = Field(default_factory=dict)
     thread_id: str | None = None
@@ -35,7 +32,7 @@ class EvalResult(BaseModel):
             f.write(self.model_dump_json(indent=2))
 
     @classmethod
-    def list_results(cls, results_dir: str = "eval_results") -> List["EvalResult"]:
+    def list_results(cls, results_dir: str = "eval_results") -> list["EvalResult"]:
         if not os.path.isdir(results_dir):
             return []
         results = []

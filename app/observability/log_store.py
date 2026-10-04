@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import psycopg
 from psycopg.rows import dict_row
@@ -25,7 +25,7 @@ class LogStore:
         self.table_name = "rag_logs"
         self._enabled = settings.OBSERVABILITY_ENABLED
         self._table_ready = False
-        self._write_queue: asyncio.Queue[Dict[str, Any]] = asyncio.Queue(maxsize=10000)
+        self._write_queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=10000)
         self._drain_task: asyncio.Task[Any] | None = None
         self._shutdown = False
 
@@ -90,7 +90,7 @@ class LogStore:
             _sys_logger.warning("log_store_table_init_failed: %s", e)
             self._enabled = False
 
-    def enqueue(self, entry: Dict[str, Any]):
+    def enqueue(self, entry: dict[str, Any]):
         """Called from structlog processor (sync context). Thread-safe with asyncio.Queue."""
         if not self._enabled:
             return
@@ -120,14 +120,14 @@ class LogStore:
         await self._flush_remaining()
 
     async def _drain_loop(self):
-        batch: List[Dict[str, Any]] = []
+        batch: list[dict[str, Any]] = []
         while not self._shutdown:
             try:
                 # Wait for first item with timeout
                 try:
                     item = await asyncio.wait_for(self._write_queue.get(), timeout=0.5)
                     batch.append(item)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     pass
 
                 # Drain remaining without blocking
@@ -146,7 +146,7 @@ class LogStore:
                 await asyncio.sleep(1)
 
     async def _flush_remaining(self):
-        batch: List[Dict[str, Any]] = []
+        batch: list[dict[str, Any]] = []
         while True:
             try:
                 batch.append(self._write_queue.get_nowait())
@@ -155,45 +155,47 @@ class LogStore:
         if batch:
             await self._write_batch(batch)
 
-    async def _write_batch(self, batch: List[Dict[str, Any]]):
+    async def _write_batch(self, batch: list[dict[str, Any]]):
         if not self._enabled:
             return
         try:
-            async with await self._get_async_connection() as conn:
-                async with conn.cursor() as cur:
-                    data = [
-                        (
-                            e["id"],
-                            e["timestamp"],
-                            e["level"],
-                            e["logger_name"],
-                            e["event"],
-                            e.get("trace_id"),
-                            e.get("request_id"),
-                            e["message"],
-                            json.dumps(e.get("extra", {})),
-                        )
-                        for e in batch
-                    ]
-                    await cur.executemany(
-                        SQL(
-                            """INSERT INTO {table}
-                            (id, timestamp, level, logger_name, event, trace_id, request_id, message, extra)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (id) DO NOTHING
-                        """
-                        ).format(table=Identifier(self.table_name)),
-                        data,
+            async with (
+                await self._get_async_connection() as conn,
+                conn.cursor() as cur,
+            ):
+                data = [
+                    (
+                        e["id"],
+                        e["timestamp"],
+                        e["level"],
+                        e["logger_name"],
+                        e["event"],
+                        e.get("trace_id"),
+                        e.get("request_id"),
+                        e["message"],
+                        json.dumps(e.get("extra", {})),
                     )
+                    for e in batch
+                ]
+                await cur.executemany(
+                    SQL(
+                        """INSERT INTO {table}
+                        (id, timestamp, level, logger_name, event, trace_id, request_id, message, extra)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (id) DO NOTHING
+                    """
+                    ).format(table=Identifier(self.table_name)),
+                    data,
+                )
         except Exception as e:
             _sys_logger.warning("log_store_batch_write_failed: %s", e)
 
-    async def query(self, q: LogQuery) -> List[LogEntry]:
+    async def query(self, q: LogQuery) -> list[LogEntry]:
         if not self._enabled:
             return []
 
         conditions = []
-        params: List[Any] = []
+        params: list[Any] = []
 
         if q.level:
             conditions.append(SQL("level = %s"))
@@ -232,26 +234,26 @@ class LogStore:
         params.extend([q.limit, q.offset])
 
         try:
-            async with await self._get_async_connection() as conn:
-                async with conn.cursor() as cur:
-                    await cur.execute(query_sql, params)
-                    rows = await cur.fetchall()
-                    return [
-                        LogEntry(
-                            id=row["id"],
-                            timestamp=row["timestamp"].isoformat(),
-                            level=row["level"],
-                            logger_name=row["logger_name"] or "",
-                            event=row["event"],
-                            trace_id=row.get("trace_id"),
-                            request_id=row.get("request_id"),
-                            message=row["message"] or "",
-                            extra=(
-                                row["extra"] if isinstance(row["extra"], dict) else {}
-                            ),
-                        )
-                        for row in rows
-                    ]
+            async with (
+                await self._get_async_connection() as conn,
+                conn.cursor() as cur,
+            ):
+                await cur.execute(query_sql, params)
+                rows = await cur.fetchall()
+                return [
+                    LogEntry(
+                        id=row["id"],
+                        timestamp=row["timestamp"].isoformat(),
+                        level=row["level"],
+                        logger_name=row["logger_name"] or "",
+                        event=row["event"],
+                        trace_id=row.get("trace_id"),
+                        request_id=row.get("request_id"),
+                        message=row["message"] or "",
+                        extra=(row["extra"] if isinstance(row["extra"], dict) else {}),
+                    )
+                    for row in rows
+                ]
         except Exception as e:
             _sys_logger.warning("log_store_query_failed: %s", e)
             return []
@@ -260,7 +262,7 @@ class LogStore:
         if not self._enabled:
             return 0
         conditions = []
-        params: List[Any] = []
+        params: list[Any] = []
         if q.level:
             conditions.append(SQL("level = %s"))
             params.append(q.level.upper())
@@ -277,42 +279,46 @@ class LogStore:
             where_clause = SQL("WHERE ") + SQL(" AND ").join(conditions)
 
         try:
-            async with await self._get_async_connection() as conn:
-                async with conn.cursor() as cur:
-                    await cur.execute(
-                        SQL("SELECT COUNT(*) as cnt FROM {table} {where}").format(
-                            table=Identifier(self.table_name),
-                            where=where_clause,
-                        ),
-                        params,
-                    )
-                    row = await cur.fetchone()
-                    return row["cnt"] if row else 0
+            async with (
+                await self._get_async_connection() as conn,
+                conn.cursor() as cur,
+            ):
+                await cur.execute(
+                    SQL("SELECT COUNT(*) as cnt FROM {table} {where}").format(
+                        table=Identifier(self.table_name),
+                        where=where_clause,
+                    ),
+                    params,
+                )
+                row = await cur.fetchone()
+                return row["cnt"] if row else 0
         except Exception:
             return 0
 
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         if not self._enabled:
             return {"enabled": False}
 
         try:
-            async with await self._get_async_connection() as conn:
-                async with conn.cursor() as cur:
-                    await cur.execute(
-                        SQL(
-                            "SELECT level, COUNT(*) as cnt FROM {table} GROUP BY level ORDER BY cnt DESC"
-                        ).format(table=Identifier(self.table_name))
-                    )
-                    level_counts = {
-                        row["level"]: row["cnt"] for row in await cur.fetchall()
-                    }
+            async with (
+                await self._get_async_connection() as conn,
+                conn.cursor() as cur,
+            ):
+                await cur.execute(
+                    SQL(
+                        "SELECT level, COUNT(*) as cnt FROM {table} GROUP BY level ORDER BY cnt DESC"
+                    ).format(table=Identifier(self.table_name))
+                )
+                level_counts = {
+                    row["level"]: row["cnt"] for row in await cur.fetchall()
+                }
 
-                    await cur.execute(
-                        SQL("SELECT COUNT(*) as cnt FROM {table}").format(
-                            table=Identifier(self.table_name)
-                        )
+                await cur.execute(
+                    SQL("SELECT COUNT(*) as cnt FROM {table}").format(
+                        table=Identifier(self.table_name)
                     )
-                    total = (await cur.fetchone())["cnt"]
+                )
+                total = (await cur.fetchone())["cnt"]
 
             return {
                 "enabled": True,

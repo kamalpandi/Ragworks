@@ -1,5 +1,3 @@
-from typing import List
-
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from .base import BaseChunkingStrategy
@@ -13,5 +11,5 @@ class RecursiveChunkingStrategy(BaseChunkingStrategy):
             separators=["\n\n", "\n", ". ", " ", ""],
         )
 
-    def chunk(self, text: str) -> List[str]:
+    def chunk(self, text: str) -> list[str]:
         return self.splitter.split_text(text)

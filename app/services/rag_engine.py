@@ -1,6 +1,5 @@
 import asyncio
 import time
-from typing import Dict, List, Optional
 
 from app.components.llms.base import BaseLLMProvider
 from app.components.query_translation import (
@@ -46,7 +45,7 @@ class RAGEngine:
         query: str,
         filters: dict,
         tenant_id: str = "default",
-    ) -> List[DocumentChunk]:
+    ) -> list[DocumentChunk]:
         vector = await self.embedder.embed_text(query)
         return await self.vector_db.search(
             vector, top_k=settings.RETRIEVAL_TOP_K, filters=filters, tenant_id=tenant_id
@@ -55,12 +54,12 @@ class RAGEngine:
     async def answer_question(
         self,
         query: str,
-        file_filter: Optional[str] = None,
-        translation_strategy: Optional[QueryTranslationStrategyType] = None,
-        system_prompt: Optional[str] = None,
+        file_filter: str | None = None,
+        translation_strategy: QueryTranslationStrategyType | None = None,
+        system_prompt: str | None = None,
         tenant_id: str = "default",
-        thread_id: Optional[str] = None,
-    ) -> Dict:
+        thread_id: str | None = None,
+    ) -> dict:
         rag_active_requests.inc()
         pipeline_start = time.time()
 

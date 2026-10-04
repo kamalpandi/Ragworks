@@ -1,4 +1,5 @@
-from typing import Literal, List
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -12,7 +13,7 @@ class FrontendConfig(BaseModel):
     # Provider Matrix
     LLM_PROVIDER: Literal["openai", "ollama", "llamacpp"]
     LOCAL_MODEL: str
-    AVAILABLE_LOCAL_MODELS: List[str]
+    AVAILABLE_LOCAL_MODELS: list[str]
     LLM_MODEL: str
     OLLAMA_MODEL: str
     REMOTE_LLAMACPP_URL: str
@@ -22,7 +23,7 @@ class FrontendConfig(BaseModel):
     LLM_TEMP: float
     LLM_MAX_TOKENS: int
     LLM_N_CTX: int
-    LLM_STOP_SEQUENCES: List[str]
+    LLM_STOP_SEQUENCES: list[str]
 
     # Vector Space Definitions
     EMBEDDING_MODEL: str
@@ -53,5 +54,5 @@ class FrontendConfig(BaseModel):
 
     # Evaluation
     EVAL_ENABLED: bool
-    EVAL_METRICS: List[str]
+    EVAL_METRICS: list[str]
     EVAL_RESULTS_DIR: str

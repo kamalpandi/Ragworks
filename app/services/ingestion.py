@@ -1,7 +1,6 @@
 import asyncio
 import time
 import uuid
-from typing import List
 
 from app.components.chunking.factory import ChunkingFactory
 from app.components.embedders.langchain_wrapper import LangChainEmbeddingsWrapper
@@ -19,7 +18,7 @@ class IngestionService:
         self.vector_db = vector_db
 
     async def ingest_texts(
-        self, texts: List[str], source_name: str, tenant_id: str = "default"
+        self, texts: list[str], source_name: str, tenant_id: str = "default"
     ):
         start_time = time.time()
         logger.info("ingest_started", source=source_name, num_texts=len(texts))
@@ -32,7 +31,7 @@ class IngestionService:
             strategy=settings.CHUNKING_STRATEGY, embedder=lc_embedder, token_safe=True
         )
 
-        all_chunks: List[DocumentChunk] = []
+        all_chunks: list[DocumentChunk] = []
         total_tokens = 0
 
         for text in texts:

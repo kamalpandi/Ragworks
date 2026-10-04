@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 from app.evaluation.base import BaseMetric
 
 
@@ -15,12 +13,13 @@ class ContextRecall(BaseMetric):
         self,
         query: str,
         answer: str,
-        contexts: List[str],
-        ground_truth: Optional[str] = None,
-    ) -> Dict[str, float]:
+        contexts: list[str],
+        ground_truth: str | None = None,
+    ) -> dict[str, float]:
         try:
-            from ragas.metrics import ContextRecall as RagasContextRecall
             from ragas import SingleTurnSample
+            from ragas.metrics import ContextRecall as RagasContextRecall
+
             from app.evaluation.metrics import _get_eval_llm
 
             metric = RagasContextRecall(llm=_get_eval_llm())

@@ -1,5 +1,3 @@
-from typing import List
-
 from .base import BaseChunkingStrategy
 
 
@@ -8,7 +6,7 @@ class ParagraphChunkingStrategy(BaseChunkingStrategy):
         self.chunk_size = chunk_size
         self.overlap_size = overlap_size
 
-    def chunk(self, text: str) -> List[str]:
+    def chunk(self, text: str) -> list[str]:
         # 1. Split text into atomic units (paragraphs)
         paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
 

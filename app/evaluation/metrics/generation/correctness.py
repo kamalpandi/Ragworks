@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 from app.evaluation.base import BaseMetric
 
 
@@ -15,14 +13,15 @@ class Correctness(BaseMetric):
         self,
         query: str,
         answer: str,
-        contexts: List[str],
-        ground_truth: Optional[str] = None,
-    ) -> Dict[str, float]:
+        contexts: list[str],
+        ground_truth: str | None = None,
+    ) -> dict[str, float]:
         if not ground_truth:
             return {"correctness": 0.0}
         try:
-            from ragas.metrics import Correctness as RagasCorrectness
             from ragas import SingleTurnSample
+            from ragas.metrics import Correctness as RagasCorrectness
+
             from app.evaluation.metrics import _get_eval_llm
 
             metric = RagasCorrectness(llm=_get_eval_llm())

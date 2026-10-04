@@ -1,5 +1,3 @@
-from typing import List
-
 import tiktoken
 
 from app.core.config import settings
@@ -14,7 +12,7 @@ class TokenSafeMixin:
         self.encoder = tiktoken.encoding_for_model(model)
         self.max_tokens = max_tokens
 
-    def enforce_token_limit(self, chunks: List[str]) -> List[str]:
+    def enforce_token_limit(self, chunks: list[str]) -> list[str]:
         safe_chunks = []
 
         for chunk in chunks:

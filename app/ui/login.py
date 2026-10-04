@@ -46,7 +46,7 @@ async def login_submit(api_key: str = Form(...), next_path: str = Form("/")):
             content={"success": False, "error": "Invalid API key"},
         )
 
-    tenant_id, key_id = result
+    tenant_id, _key_id = result
     return JSONResponse(
         status_code=200,
         content={

@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC
 
 import structlog
 
@@ -42,11 +43,11 @@ def _db_processor(logger, method_name, event_dict):
                 safe_extra[k] = str(v)
 
         import uuid
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         entry = {
             "id": str(uuid.uuid4()),
-            "timestamp": datetime.now(timezone.utc),
+            "timestamp": datetime.now(UTC),
             "level": level,
             "logger_name": event_dict.get("logger", ""),
             "event": event_name or "",

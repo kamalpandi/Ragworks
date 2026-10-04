@@ -6,18 +6,29 @@ from app.components.query_translation.base import BaseQueryTranslator
 # ── Intent detection ───────────────────────────────────────────────────────────
 INTENT_PATTERNS: list[tuple[re.Pattern, str]] = [
     (
-        re.compile(r"\b(summarize|summary|overview|tldr|tl;dr|recap)\b", re.I),
+        re.compile(r"\b(summarize|summary|overview|tldr|tl;dr|recap)\b", re.IGNORECASE),
         "summarize",
     ),
     (
-        re.compile(r"\b(explain|what is|what are|describe|clarify|elaborate)\b", re.I),
+        re.compile(
+            r"\b(explain|what is|what are|describe|clarify|elaborate)\b", re.IGNORECASE
+        ),
         "explain",
     ),
-    (re.compile(r"\b(list|enumerate|what are the|give me all)\b", re.I), "list"),
-    (re.compile(r"\b(compare|difference|vs|versus|contrast)\b", re.I), "compare"),
-    (re.compile(r"\b(how|steps|process|guide|tutorial|implement)\b", re.I), "howto"),
-    (re.compile(r"\b(why|reason|cause|motivation|purpose)\b", re.I), "why"),
-    (re.compile(r"\b(find|search|look for|locate|show me)\b", re.I), "find"),
+    (
+        re.compile(r"\b(list|enumerate|what are the|give me all)\b", re.IGNORECASE),
+        "list",
+    ),
+    (
+        re.compile(r"\b(compare|difference|vs|versus|contrast)\b", re.IGNORECASE),
+        "compare",
+    ),
+    (
+        re.compile(r"\b(how|steps|process|guide|tutorial|implement)\b", re.IGNORECASE),
+        "howto",
+    ),
+    (re.compile(r"\b(why|reason|cause|motivation|purpose)\b", re.IGNORECASE), "why"),
+    (re.compile(r"\b(find|search|look for|locate|show me)\b", re.IGNORECASE), "find"),
 ]
 
 INTENT_PREFIXES: dict[str, str] = {
@@ -53,7 +64,7 @@ _STOPWORDS = {
 
 _PLACEHOLDER_RE = re.compile(
     r"\b(this|it|that|the article|the document|the file|the page|the content|above|same)\b",
-    re.I,
+    re.IGNORECASE,
 )
 
 
@@ -67,7 +78,7 @@ def _extract_topic(file_name: str) -> str:
 
     words = re.split(r"[-_\s]+", raw)
     meaningful = [
-        w.upper() if re.match(r"^[a-z]{1,3}\d+$", w, re.I) else w.title()
+        w.upper() if re.match(r"^[a-z]{1,3}\d+$", w, re.IGNORECASE) else w.title()
         for w in words
         if w.lower() not in _STOPWORDS and len(w) > 1
     ]

@@ -16,7 +16,7 @@ Run this as a single script to verify the whole RAG stack works together.
 import asyncio
 import os
 import time
-from typing import List, Optional, TypedDict
+from typing import TypedDict
 
 import httpx
 
@@ -51,12 +51,12 @@ OSHA_URL = "https://www.osha.gov/workers/file-complaint"  # real OSHA page
 # FIX 1: Create a rigid schema definitions contract for the linter
 class QueryQuestion(TypedDict):
     text: str
-    filter: Optional[str]
-    strategy: Optional[str]
+    filter: str | None
+    strategy: str | None
 
 
 # FIX 2: Explicitly type-hint the list to enforce the string guarantee on "text"
-QUESTIONS: List[QueryQuestion] = [
+QUESTIONS: list[QueryQuestion] = [
     {
         "text": "How soon after a workplace incident must a written report be filed?",
         "filter": None,

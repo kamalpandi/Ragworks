@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 
 def _sanitize_name(name: str) -> str:
@@ -42,7 +41,7 @@ def delete_prompt(name: str, category: str = "system") -> bool:
     return True
 
 
-def get_available_prompts(category: str = "system") -> List[str]:
+def get_available_prompts(category: str = "system") -> list[str]:
     """
     Scans the prompt directory and returns a clean list of available .md names.
     Perfect for populating the front-end dropdown menu.

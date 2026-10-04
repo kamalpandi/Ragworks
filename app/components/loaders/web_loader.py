@@ -1,7 +1,6 @@
 import asyncio
 import random
 import re
-from typing import Optional
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
@@ -89,8 +88,10 @@ def _extract_main_content(soup: BeautifulSoup) -> Tag:
         soup.find("main"),
         soup.find("article"),
         soup.find(attrs={"role": "main"}),
-        soup.find(id=re.compile(r"(content|main|article|post|body)", re.I)),
-        soup.find(class_=re.compile(r"(content|main|article|post|body)", re.I)),
+        soup.find(id=re.compile(r"(content|main|article|post|body)", re.IGNORECASE)),
+        soup.find(
+            class_=re.compile(r"(content|main|article|post|body)", re.IGNORECASE)
+        ),
         soup.body,
     ]
     result = next((c for c in candidates if c), soup)
@@ -139,8 +140,8 @@ async def parse_url(
     max_retries: int = 3,
     retry_delay: float = 1.5,
     respect_robots: bool = True,
-    proxy: Optional[str] = None,
-    cookies: Optional[dict] = None,
+    proxy: str | None = None,
+    cookies: dict | None = None,
     junk_tags: list[str] = JUNK_TAGS,
 ) -> ScrapeResult:
     empty = ScrapeResult(text="", url=url)
@@ -159,7 +160,7 @@ async def parse_url(
     if cookies:
         client_kwargs["cookies"] = cookies
 
-    last_error: Optional[Exception] = None
+    last_error: Exception | None = None
 
     for attempt in range(1, max_retries + 1):
         try:

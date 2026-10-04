@@ -1,5 +1,4 @@
-from prometheus_client import Counter, Gauge, Histogram, generate_latest, REGISTRY
-
+from prometheus_client import REGISTRY, Counter, Gauge, Histogram, generate_latest
 
 _metrics_registry = REGISTRY
 
@@ -80,7 +79,6 @@ rag_usage_tokens_total = Counter(
 
 def init_metrics():
     """No-op; metrics are initialized at import time."""
-    pass
 
 
 def get_metrics_registry():

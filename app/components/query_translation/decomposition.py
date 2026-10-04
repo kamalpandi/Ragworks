@@ -1,10 +1,8 @@
-from typing import List
-
 from .base import BaseQueryTranslator
 
 
 class MultiQueryTranslator(BaseQueryTranslator):
-    async def translate(self, query: str) -> List[str]:
+    async def translate(self, query: str) -> list[str]:
         prompt = self.user_prompt_template.format(query=query)
 
         response = await self.llm.complete(prompt=prompt, system=self.system_prompt)
@@ -13,7 +11,7 @@ class MultiQueryTranslator(BaseQueryTranslator):
 
 
 class StepBackTranslator(BaseQueryTranslator):
-    async def translate(self, query: str) -> List[str]:
+    async def translate(self, query: str) -> list[str]:
         prompt = self.user_prompt_template.format(query=query)
 
         step_back_question = await self.llm.complete(
@@ -24,7 +22,7 @@ class StepBackTranslator(BaseQueryTranslator):
 
 
 class RagFusionTranslator(BaseQueryTranslator):
-    async def translate(self, query: str) -> List[str]:
+    async def translate(self, query: str) -> list[str]:
         prompt = self.user_prompt_template.format(query=query)
 
         response = await self.llm.complete(prompt=prompt, system=self.system_prompt)

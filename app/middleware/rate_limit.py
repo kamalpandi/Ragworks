@@ -69,4 +69,4 @@ def _is_query_path(path: str) -> bool:
 
 
 def _is_ingest_path(path: str) -> bool:
-    return path.startswith("/api/v1/ingest") or path.startswith("/ui/ingest")
+    return path.startswith(("/api/v1/ingest", "/ui/ingest"))

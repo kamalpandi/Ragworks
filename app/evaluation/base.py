@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
 
 
 class BaseMetric(ABC):
@@ -15,11 +14,10 @@ class BaseMetric(ABC):
         self,
         query: str,
         answer: str,
-        contexts: List[str],
-        ground_truth: Optional[str] = None,
-    ) -> Dict[str, float]:
+        contexts: list[str],
+        ground_truth: str | None = None,
+    ) -> dict[str, float]:
         """Compute metric scores.
 
         Returns a dict of metric_name -> score (0.0 to 1.0).
         """
-        pass

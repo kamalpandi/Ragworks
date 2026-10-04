@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 from app.evaluation.base import BaseMetric
 
 
@@ -15,12 +13,13 @@ class AnswerRelevancy(BaseMetric):
         self,
         query: str,
         answer: str,
-        contexts: List[str],
-        ground_truth: Optional[str] = None,
-    ) -> Dict[str, float]:
+        contexts: list[str],
+        ground_truth: str | None = None,
+    ) -> dict[str, float]:
         try:
-            from ragas.metrics import AnswerRelevancy as RagasAnswerRelevancy
             from ragas import SingleTurnSample
+            from ragas.metrics import AnswerRelevancy as RagasAnswerRelevancy
+
             from app.evaluation.metrics import _get_eval_llm
 
             metric = RagasAnswerRelevancy(llm=_get_eval_llm())

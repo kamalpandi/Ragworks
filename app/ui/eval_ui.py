@@ -2,8 +2,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from app.core.config import settings
-from app.evaluation.models import EvalResult
 from app.evaluation.metrics import list_available_metrics
+from app.evaluation.models import EvalResult
 from app.services.conversation_service import list_threads
 from app.ui import templates
 

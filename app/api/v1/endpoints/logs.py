@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import APIRouter, Query
 
 from app.models.log_entry import LogQuery
@@ -10,13 +8,13 @@ router = APIRouter()
 
 @router.get("/")
 async def query_logs(
-    level: Optional[str] = Query(None),
-    event: Optional[str] = Query(None),
-    trace_id: Optional[str] = Query(None),
-    request_id: Optional[str] = Query(None),
-    search: Optional[str] = Query(None),
-    since: Optional[str] = Query(None),
-    until: Optional[str] = Query(None),
+    level: str | None = Query(None),
+    event: str | None = Query(None),
+    trace_id: str | None = Query(None),
+    request_id: str | None = Query(None),
+    search: str | None = Query(None),
+    since: str | None = Query(None),
+    until: str | None = Query(None),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
 ):

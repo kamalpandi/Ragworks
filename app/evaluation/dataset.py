@@ -1,5 +1,5 @@
 import json
-from typing import AsyncIterator, Dict, List, Optional
+from collections.abc import AsyncIterator
 
 from datasets import load_dataset
 
@@ -8,9 +8,9 @@ class DatasetEntry:
     def __init__(
         self,
         query: str,
-        ground_truth: Optional[str] = None,
-        contexts: Optional[List[str]] = None,
-        metadata: Optional[Dict] = None,
+        ground_truth: str | None = None,
+        contexts: list[str] | None = None,
+        metadata: dict | None = None,
     ):
         self.query = query
         self.ground_truth = ground_truth
@@ -28,7 +28,7 @@ class DatasetLoader:
     """
 
     @staticmethod
-    def from_json(filepath: str) -> List[DatasetEntry]:
+    def from_json(filepath: str) -> list[DatasetEntry]:
         with open(filepath) as f:
             data = json.load(f)
         entries = []
@@ -44,7 +44,7 @@ class DatasetLoader:
         return entries
 
     @staticmethod
-    def from_csv(filepath: str) -> List[DatasetEntry]:
+    def from_csv(filepath: str) -> list[DatasetEntry]:
         import csv
 
         entries = []
@@ -68,9 +68,9 @@ class DatasetLoader:
         split: str = "test",
         question_field: str = "question",
         answer_field: str = "answer",
-        contexts_field: Optional[str] = "contexts",
+        contexts_field: str | None = "contexts",
         max_samples: int = 100,
-    ) -> List[DatasetEntry]:
+    ) -> list[DatasetEntry]:
         ds = load_dataset(dataset_name, split=split)
         entries = []
         for i, row in enumerate(ds):
@@ -91,7 +91,7 @@ class DatasetLoader:
 
     @staticmethod
     async def iterate(
-        entries: List[DatasetEntry],
+        entries: list[DatasetEntry],
     ) -> AsyncIterator[DatasetEntry]:
         for entry in entries:
             yield entry

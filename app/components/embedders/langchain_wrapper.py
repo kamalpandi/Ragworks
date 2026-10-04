@@ -1,6 +1,5 @@
 import asyncio
 import concurrent.futures
-from typing import List
 
 from langchain_core.embeddings import Embeddings
 
@@ -26,7 +25,7 @@ class LangChainEmbeddingsWrapper(Embeddings):
         else:
             return asyncio.run(coroutine)
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         batch_size = settings.BATCH_SIZE
         all_embeddings = []
 
@@ -44,5 +43,5 @@ class LangChainEmbeddingsWrapper(Embeddings):
 
         return all_embeddings
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         return self._run_async(self.embedder.embed_text(text))

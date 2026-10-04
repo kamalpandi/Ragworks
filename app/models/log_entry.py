@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -7,15 +7,13 @@ from pydantic import BaseModel, Field
 class LogEntry(BaseModel):
     """Structured log entry stored in the database."""
 
-    id: Optional[str] = None
-    timestamp: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    id: str | None = None
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     level: str = "INFO"
     logger_name: str = ""
     event: str = ""
-    trace_id: Optional[str] = None
-    request_id: Optional[str] = None
+    trace_id: str | None = None
+    request_id: str | None = None
     message: str = ""
     extra: dict[str, Any] = Field(default_factory=dict)
 
@@ -23,13 +21,13 @@ class LogEntry(BaseModel):
 class LogQuery(BaseModel):
     """Query parameters for log retrieval."""
 
-    level: Optional[str] = None
-    logger_name: Optional[str] = None
-    event: Optional[str] = None
-    trace_id: Optional[str] = None
-    request_id: Optional[str] = None
-    since: Optional[str] = None
-    until: Optional[str] = None
-    search: Optional[str] = None
+    level: str | None = None
+    logger_name: str | None = None
+    event: str | None = None
+    trace_id: str | None = None
+    request_id: str | None = None
+    since: str | None = None
+    until: str | None = None
+    search: str | None = None
     limit: int = 100
     offset: int = 0

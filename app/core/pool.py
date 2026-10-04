@@ -1,4 +1,4 @@
-from typing import Dict, Any, cast
+from typing import Any, cast
 
 from psycopg import Connection
 from psycopg_pool import AsyncConnectionPool
@@ -56,7 +56,7 @@ def get_pool() -> AsyncConnectionPool:
     return _pool
 
 
-def get_sync_connection() -> Connection[Dict[str, Any]]:
+def get_sync_connection() -> Connection[dict[str, Any]]:
     from psycopg.rows import dict_row
 
     conn = Connection.connect(
@@ -64,4 +64,4 @@ def get_sync_connection() -> Connection[Dict[str, Any]]:
         row_factory=dict_row,
         autocommit=True,
     )
-    return cast(Connection[Dict[str, Any]], conn)
+    return cast(Connection[dict[str, Any]], conn)

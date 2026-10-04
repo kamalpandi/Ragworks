@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from app.components.llms.base import BaseLLMProvider
 
@@ -13,6 +12,5 @@ class BaseQueryTranslator(ABC):
         self.user_prompt_template = user_prompt_template
 
     @abstractmethod
-    async def translate(self, query: str) -> List[str]:
+    async def translate(self, query: str) -> list[str]:
         """Translate or expand a user query into one or more optimized queries."""
-        pass

@@ -1,5 +1,3 @@
-from typing import List
-
 from app.components.rerankers.base import BaseReranker
 from app.core.config import settings
 from app.models.domain import DocumentChunk
@@ -20,8 +18,8 @@ class FlashRankReranker(BaseReranker):
         self._model = Ranker(model_name=self._model_name)
 
     async def rerank(
-        self, query: str, chunks: List[DocumentChunk], top_n: int
-    ) -> List[DocumentChunk]:
+        self, query: str, chunks: list[DocumentChunk], top_n: int
+    ) -> list[DocumentChunk]:
         if not chunks:
             return []
         if len(chunks) <= top_n:

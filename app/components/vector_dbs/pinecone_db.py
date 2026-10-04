@@ -1,5 +1,5 @@
 import time
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, cast
 
 from pinecone import ServerlessSpec, Vector
 from pinecone.grpc import PineconeGRPC as Pinecone
@@ -45,14 +45,14 @@ class PineconeDB(BaseVectorDB):
 
     async def upsert(
         self,
-        chunks: List[DocumentChunk],
-        embeddings: List[List[float]],
+        chunks: list[DocumentChunk],
+        embeddings: list[list[float]],
         tenant_id: str = "default",
     ):
         if len(chunks) != len(embeddings):
             raise ValueError("Number of chunks and embeddings must match!")
 
-        vectors: List[Vector] = []
+        vectors: list[Vector] = []
 
         for chunk, embedding in zip(chunks, embeddings):
             meta: dict[str, float | int | list[float] | list[int] | list[str] | str] = (
@@ -70,16 +70,16 @@ class PineconeDB(BaseVectorDB):
 
         self.index.upsert(vectors=vectors, namespace=tenant_id)
 
-    async def get_distinct_sources(self, tenant_id: str = "default") -> List[str]:
+    async def get_distinct_sources(self, tenant_id: str = "default") -> list[str]:
         return []
 
     async def search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         top_k: int,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: dict[str, Any] | None = None,
         tenant_id: str = "default",
-    ) -> List[DocumentChunk]:
+    ) -> list[DocumentChunk]:
         if len(query_vector) != settings.EMBEDDING_DIMENSION:
             raise ValueError(
                 f"Query vector size {len(query_vector)} does not match Index dimension {settings.EMBEDDING_DIMENSION}"

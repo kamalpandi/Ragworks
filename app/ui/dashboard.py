@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
@@ -30,10 +30,9 @@ async def htmx_status_cards(request: Request):
     db_status = "disconnected"
     try:
         pool = get_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("SELECT 1")
-                await cur.fetchone()
+        async with pool.connection() as conn, conn.cursor() as cur:
+            await cur.execute("SELECT 1")
+            await cur.fetchone()
         db_status = "connected"
     except Exception:
         pass
@@ -42,24 +41,21 @@ async def htmx_status_cards(request: Request):
         from app.core.pool import get_pool
 
         pool = get_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(
-                    "SELECT COUNT(*) FROM rag_vectors_"
-                    + str(settings.EMBEDDING_DIMENSION)
-                )
-                row = await cur.fetchone()
-                doc_count = row[0] if row else 0
+        async with pool.connection() as conn, conn.cursor() as cur:
+            await cur.execute(
+                "SELECT COUNT(*) FROM rag_vectors_" + str(settings.EMBEDDING_DIMENSION)
+            )
+            row = await cur.fetchone()
+            doc_count = row[0] if row else 0
     except Exception:
         doc_count = 0
 
     try:
         pool = get_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("SELECT COUNT(*) FROM api_keys")
-                row = await cur.fetchone()
-                key_count = row[0] if row else 0
+        async with pool.connection() as conn, conn.cursor() as cur:
+            await cur.execute("SELECT COUNT(*) FROM api_keys")
+            row = await cur.fetchone()
+            key_count = row[0] if row else 0
     except Exception:
         key_count = 0
 
@@ -78,7 +74,7 @@ async def htmx_status_cards(request: Request):
             "doc_count": doc_count,
             "key_count": key_count,
             "vector_provider": vector_provider,
-            "updated": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+            "updated": datetime.now(UTC).strftime("%H:%M:%S"),
         },
     )
 
@@ -86,7 +82,7 @@ async def htmx_status_cards(request: Request):
 @router.get("/ui/dashboard/stats", response_class=HTMLResponse)
 async def htmx_usage_stats(request: Request):
     tenant_id = getattr(request.state, "tenant_id", "dev")
-    since = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0)
+    since = datetime.now(UTC).replace(hour=0, minute=0, second=0)
 
     query_count = 0
     ingest_count = 0

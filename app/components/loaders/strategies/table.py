@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 import pdfplumber.page
 
@@ -12,7 +12,7 @@ class TableStrategy(PageStrategy):
     and converts the tables to Markdown.
     """
 
-    def _convert_table_to_markdown(self, table_data: List[List[Any]]) -> str:
+    def _convert_table_to_markdown(self, table_data: list[list[Any]]) -> str:
         """Helper to format a list of lists into a Markdown table."""
         if not table_data:
             return ""
@@ -58,7 +58,7 @@ class TableStrategy(PageStrategy):
 
         # 2. Iterate through tables, extracting text in between
         for table in tables:
-            x0, top, x1, bottom = table.bbox
+            _x0, top, _x1, bottom = table.bbox
 
             # A. Extract text occurring BEFORE this table (from last_bottom to table.top)
             if top > last_bottom:

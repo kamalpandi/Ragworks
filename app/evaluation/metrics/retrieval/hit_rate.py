@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 from app.evaluation.base import BaseMetric
 
 
@@ -12,9 +10,9 @@ class HitRate(BaseMetric):
         self,
         query: str,
         answer: str,
-        contexts: List[str],
-        ground_truth: Optional[str] = None,
-    ) -> Dict[str, float]:
+        contexts: list[str],
+        ground_truth: str | None = None,
+    ) -> dict[str, float]:
         if not contexts or not ground_truth:
             return {"hit_rate": 0.0}
         hit = any(ground_truth.lower() in ctx.lower() for ctx in contexts)
