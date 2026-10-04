@@ -23,18 +23,22 @@ Every request to `/api/v1/*` SHALL be intercepted by authentication middleware t
 - **WHEN** a browser requests `/query` with a valid session cookie but no API key header
 - **THEN** the API key middleware does not reject the request
 
+## REMOVED Requirements
+
 ### Requirement: Exempt endpoints
-The API-key authentication middleware SHALL apply only to requests under `/api/v1/*`. Endpoints outside that prefix (including `/metrics`, `/docs`, `/openapi.json`, `/health`, and `/login`) SHALL NOT be validated by the API-key middleware. Browser-facing pages and fragments SHALL instead require a valid frontend session, and unauthenticated browser requests to them SHALL be redirected to `/login`.
+
+## ADDED Requirements
+
+### Requirement: Middleware scope
+The API-key authentication middleware SHALL apply only to requests under `/api/v1/*`. Requests outside that prefix — including `/metrics`, `/docs`, `/openapi.json`, `/health`, and `/login`, and all browser-facing pages and fragments — SHALL NOT be validated by the API-key middleware. Browser-facing pages and fragments SHALL instead require a valid frontend session, and unauthenticated browser requests to them SHALL be redirected to `/login`.
 
 #### Scenario: Access metrics without API key
 - **WHEN** a GET request is made to `/metrics` without an API key
 - **THEN** the system returns Prometheus metrics (200 OK)
 
-#### Scenario: Access dashboard without API key
+#### Scenario: Access dashboard without session
 - **WHEN** a browser GET request is made to `/` without a valid session cookie or API key
 - **THEN** the system responds with HTTP 302 redirecting to `/login`
-
-## ADDED Requirements
 
 ### Requirement: API key identity endpoint
 The backend SHALL expose `GET /api/v1/auth/me` that returns the tenant identifier and key identifier associated with the presented API key, and SHALL return HTTP 401 for a missing or invalid key.

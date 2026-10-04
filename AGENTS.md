@@ -71,3 +71,7 @@ This document provides high-signal instructions for working in this repository.
 *   **API Key:** An `OPENAI_API_KEY` is required.
 *   **Local LLM:** If using a local LLM, `LOCAL_MODEL` in `.env` may point to the GGUF model file. If unset, the system auto-detects `.gguf` files in `models/`.
 *   **System Prompt:** The `SYSTEM_PROMPT_FILE` in `.env` determines which prompt from `app/prompts/` is used.
+
+## Deferred Decisions
+
+*   **`/api/v1/config` host exposure:** `/api/v1/config` exposes internal host URLs (`REMOTE_LLAMACPP_URL`, `OLLAMA_BASE_URL`, `OTEL_EXPORTER_ENDPOINT`). Not a leak today — every API key is operator-scope, so anyone who can read `/config` can already read these via `/api/v1/config`. It becomes a real exposure if limited-scope or read-only keys are introduced; if they are, filter both the API response and the config fragment in the same change. See archived change `separate-ui-from-backend`, task 7.1.
