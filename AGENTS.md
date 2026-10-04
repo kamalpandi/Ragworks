@@ -36,6 +36,8 @@ This document provides high-signal instructions for working in this repository.
     ruff check .      # lint
     ruff format .     # format
     ```
+*   **UAT / Manual Verification:** Follow `docs/uat-checklist.md`. Seed data is a
+    precondition — a `200` on an empty table does not exercise row-processing paths.
 
 ## Architecture Notes
 
