@@ -29,11 +29,6 @@ def _render_list(request: Request) -> HTMLResponse:
     )
 
 
-@router.get("/prompts", response_class=HTMLResponse)
-async def prompts_page(request: Request):
-    return templates.TemplateResponse(request=request, name="pages/prompts.html")
-
-
 @router.get("/ui/prompts/load", response_class=HTMLResponse)
 async def htmx_prompts_list(request: Request):
     return _render_list(request)

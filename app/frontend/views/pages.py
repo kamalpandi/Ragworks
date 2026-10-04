@@ -63,3 +63,8 @@ async def query_page(request: Request, session=Depends(require_session)):
             "threads": threads,
         },
     )
+
+
+@router.get("/prompts")
+async def prompts_page(request: Request, _session=Depends(require_session)):
+    return templates.TemplateResponse(request=request, name="pages/prompts.html")
