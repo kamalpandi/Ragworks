@@ -7,7 +7,7 @@ Provide API key-based authentication for all protected endpoints in the RAG serv
 ## Requirements
 
 ### Requirement: API key validation middleware
-Every request to `/api/v1/*` and `/ui/*` SHALL be intercepted by authentication middleware that extracts and validates an API key before the request reaches route handlers.
+Every request to `/api/v1/*` SHALL be intercepted by authentication middleware that extracts and validates an API key before the request reaches route handlers. Browser-facing frontend routes SHALL NOT be validated by this middleware; they are authenticated by the frontend session layer instead.
 
 #### Scenario: Valid API key in X-API-Key header
 - **WHEN** a request includes `X-API-Key: valid-key-123`
@@ -25,16 +25,9 @@ Every request to `/api/v1/*` and `/ui/*` SHALL be intercepted by authentication 
 - **WHEN** a request includes `X-API-Key: invalid-key`
 - **THEN** the system returns HTTP 401 with `{"error": "Invalid API key"}`
 
-### Requirement: Exempt endpoints
-The `/metrics`, `/docs`, `/openapi.json`, and `/health` endpoints SHALL be exempt from authentication. The `/` (dashboard) page SHALL require authentication.
-
-#### Scenario: Access metrics without API key
-- **WHEN** a GET request is made to `/metrics` without an API key
-- **THEN** the system returns Prometheus metrics (200 OK)
-
-#### Scenario: Access dashboard without API key
-- **WHEN** a GET request is made to `/` without an API key
-- **THEN** the system returns HTTP 401
+#### Scenario: Frontend route not API-key authenticated
+- **WHEN** a browser requests `/query` with a valid session cookie but no API key header
+- **THEN** the API key middleware does not reject the request
 
 ### Requirement: API key storage
 API keys SHALL be stored in a database table `api_keys` with columns: `id`, `key_hash`, `tenant_id`, `label`, `created_at`, `is_active`. Keys SHALL be validated via secure comparison.
@@ -46,3 +39,25 @@ API keys SHALL be stored in a database table `api_keys` with columns: `id`, `key
 #### Scenario: Deactivated key
 - **WHEN** a request uses an API key where `is_active = false`
 - **THEN** the system returns HTTP 401 with `{"error": "API key deactivated"}`
+
+### Requirement: Middleware scope
+The API-key authentication middleware SHALL apply only to requests under `/api/v1/*`. Requests outside that prefix — including `/metrics`, `/docs`, `/openapi.json`, `/health`, and `/login`, and all browser-facing pages and fragments — SHALL NOT be validated by the API-key middleware. Browser-facing pages and fragments SHALL instead require a valid frontend session, and unauthenticated browser requests to them SHALL be redirected to `/login`.
+
+#### Scenario: Access metrics without API key
+- **WHEN** a GET request is made to `/metrics` without an API key
+- **THEN** the system returns Prometheus metrics (200 OK)
+
+#### Scenario: Access dashboard without session
+- **WHEN** a browser GET request is made to `/` without a valid session cookie or API key
+- **THEN** the system responds with HTTP 302 redirecting to `/login`
+
+### Requirement: API key identity endpoint
+The backend SHALL expose `GET /api/v1/auth/me` that returns the tenant identifier and key identifier associated with the presented API key, and SHALL return HTTP 401 for a missing or invalid key.
+
+#### Scenario: Valid key returns identity
+- **WHEN** an authenticated client requests `GET /api/v1/auth/me` with a valid API key
+- **THEN** the backend responds with HTTP 200 and JSON containing `tenant_id` and `key_id`
+
+#### Scenario: Invalid key returns 401
+- **WHEN** a client requests `GET /api/v1/auth/me` with an invalid API key
+- **THEN** the backend responds with HTTP 401 and a JSON error body
