@@ -16,6 +16,7 @@ async def get_frontend_config(request: Request):
             APP_PORT=settings.APP_PORT,
             DEBUG=settings.DEBUG,
             USE_LOCAL_DB=settings.USE_LOCAL_DB,
+            MAX_UPLOAD_SIZE_MB=settings.MAX_UPLOAD_SIZE_MB,
             LLM_PROVIDER=settings.LLM_PROVIDER,
             LOCAL_MODEL=settings.LOCAL_MODEL,
             AVAILABLE_LOCAL_MODELS=settings.AVAILABLE_LOCAL_MODELS,

@@ -11,6 +11,7 @@ from fastapi import (
 
 from app.components.loaders.pdf_loader import parse_pdf
 from app.components.loaders.web_loader import parse_url
+from app.core.config import settings
 from app.core.dependencies import get_ingestion_service, get_vector_db
 from app.models.api_requests import IngestRequest, UrlIngestRequest
 from app.models.api_response import IngestResponse
@@ -36,15 +37,28 @@ async def ingest_file(
             detail="Filename is missing from the uploaded folder",
         )
 
+    # Supported type is decided by filename extension, never the client-supplied
+    # content-type (which the browser/client can set arbitrarily).
+    max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    content = await file.read()
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size is {settings.MAX_UPLOAD_SIZE_MB} MB.",
+        )
+
     text = ""
 
     if file.filename.endswith(".pdf"):
+        await file.seek(0)
         text = await parse_pdf(file)
     elif file.filename.endswith(".txt"):
-        content = await file.read()
         text = content.decode("utf-8")
     else:
-        return {"error": "Unsupported file type. Use .pdf or .txt"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Use .pdf or .txt",
+        )
 
     tenant_id = getattr(request.state, "tenant_id", "default")
 

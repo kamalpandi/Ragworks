@@ -9,6 +9,7 @@ class FrontendConfig(BaseModel):
     APP_PORT: int
     DEBUG: bool
     USE_LOCAL_DB: bool
+    MAX_UPLOAD_SIZE_MB: int
 
     # Provider Matrix
     LLM_PROVIDER: Literal["openai", "ollama", "llamacpp", "deepseek"]

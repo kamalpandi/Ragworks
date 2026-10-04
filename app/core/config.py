@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     TOP_K: int = 10
     RETRIEVAL_TOP_K: int = 10
     BATCH_SIZE: int = 32
+    MAX_UPLOAD_SIZE_MB: int = 50
 
     # ==========================================
     # 5b. Reranker
