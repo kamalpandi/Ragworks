@@ -4,7 +4,6 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from app.core.config import settings
-from app.models.log_entry import LogQuery
 from app.ui import templates
 
 router = APIRouter()
@@ -63,44 +62,6 @@ async def htmx_usage_stats(request: Request):
             "system_prompt": settings.SYSTEM_PROMPT_FILE,
             "rate_limit_enabled": settings.RATE_LIMIT_ENABLED,
             "tenant_id": tenant_id,
-        },
-    )
-
-
-@router.get("/ui/dashboard/activity", response_class=HTMLResponse)
-async def htmx_recent_activity(request: Request):
-    entries = []
-    try:
-        from app.observability.log_store import log_store
-
-        q = LogQuery(limit=8, offset=0)
-        entries = await log_store.query(q)
-    except Exception:
-        pass
-
-    def _level_style(level: str) -> str:
-        level = level.upper()
-        if level in ("ERROR", "CRITICAL"):
-            return "color: var(--pico-del-color); font-weight: bold;"
-        if level == "WARNING":
-            return "color: var(--pico-muted-color);"
-        return "color: inherit;"
-
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/dashboard_activity.html",
-        context={
-            "entries": [
-                {
-                    "timestamp": e.timestamp[:19]
-                    if len(e.timestamp) > 19
-                    else e.timestamp,
-                    "level": e.level,
-                    "event": e.event,
-                    "level_style": _level_style(e.level),
-                }
-                for e in entries
-            ]
         },
     )
 

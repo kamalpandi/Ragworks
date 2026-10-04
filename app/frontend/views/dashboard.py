@@ -22,6 +22,15 @@ def _db_status_color(status: str) -> str:
     return "var(--pico-muted-color)"
 
 
+def _level_style(level: str) -> str:
+    level = level.upper()
+    if level in ("ERROR", "CRITICAL"):
+        return "color: var(--pico-del-color); font-weight: bold;"
+    if level == "WARNING":
+        return "color: var(--pico-muted-color);"
+    return "color: inherit;"
+
+
 @router.get("/ui/dashboard/status")
 async def dashboard_status(request: Request, session=Depends(require_session)):
     client = get_backend_client(request)
@@ -44,4 +53,26 @@ async def dashboard_status(request: Request, session=Depends(require_session)):
             "vector_provider": status["vector_provider"],
             "updated": datetime.now(UTC).strftime("%H:%M:%S"),
         },
+    )
+
+
+@router.get("/ui/dashboard/activity")
+async def dashboard_activity(request: Request, session=Depends(require_session)):
+    client = get_backend_client(request)
+    data = (
+        await client.get("/api/v1/logs/", api_key=session.api_key, params={"limit": 8})
+    ).json()
+    entries = [
+        {
+            "timestamp": e["timestamp"],
+            "level": e["level"],
+            "event": e["event"],
+            "level_style": _level_style(e["level"]),
+        }
+        for e in data["entries"]
+    ]
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/dashboard_activity.html",
+        context={"entries": entries},
     )
