@@ -5,7 +5,6 @@ from app.ui import (
     dashboard,
     eval_ui,
     ingest,
-    login,
     observability,
     prompts,
     query,
@@ -13,7 +12,6 @@ from app.ui import (
 
 ui_router = APIRouter()
 
-ui_router.include_router(login.router, tags=["UI Auth"])
 ui_router.include_router(dashboard.router, tags=["UI Dashboard"])
 ui_router.include_router(config.router, tags=["UI Configuration"])
 ui_router.include_router(ingest.router, tags=["UI Ingestion"])

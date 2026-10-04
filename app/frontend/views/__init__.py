@@ -1,9 +1,13 @@
 """Frontend view routers.
 
-Route modules are added here during Phase 3 (pages, auth, dashboard,
-config, ingest, query, prompts, observability, eval).
+Routes are added here as domains migrate from ``app/ui`` (auth, pages,
+dashboard, config, ingest, query, prompts, observability, eval).
 """
 
 from fastapi import APIRouter
 
+from app.frontend.views import auth
+
 router = APIRouter()
+
+router.include_router(auth.router)

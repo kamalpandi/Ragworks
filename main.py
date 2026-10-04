@@ -10,6 +10,7 @@ from psycopg import Error as PsycopgError
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.frontend.views import router as frontend_router
 from app.middleware.auth import AuthMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.observability.logger import setup_logging
@@ -85,6 +86,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(frontend_router)
 app.include_router(ui_router)
 
 

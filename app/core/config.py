@@ -133,6 +133,7 @@ class Settings(BaseSettings):
     # Frontend server-side sessions & CSRF
     SESSION_COOKIE_NAME: str = "rag_session"
     SESSION_TTL_SECONDS: int = 28800  # 8 hours
+    SESSION_COOKIE_SECURE: bool = False  # set True behind HTTPS
     CSRF_HEADER_NAME: str = "X-CSRF-Token"
     PRE_SESSION_TTL_SECONDS: int = 1800  # 30 minutes (login page)
 
