@@ -43,3 +43,23 @@ async def eval_page(request: Request, session=Depends(require_session)):
         name="pages/eval.html",
         context={"metrics": metrics, "threads": threads},
     )
+
+
+@router.get("/query")
+async def query_page(request: Request, session=Depends(require_session)):
+    client = get_backend_client(request)
+    key = session.api_key
+    prompts = (await client.get("/api/v1/prompts", api_key=key)).json()[
+        "system_prompts"
+    ]
+    files = (await client.get("/api/v1/ingest/files", api_key=key)).json()["sources"]
+    threads = (await client.get("/api/v1/conversations", api_key=key)).json()["threads"]
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/query.html",
+        context={
+            "available_prompts": prompts,
+            "available_files": files,
+            "threads": threads,
+        },
+    )

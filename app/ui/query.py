@@ -3,31 +3,12 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 
 from app.components.query_translation.enricher import enrich_query
-from app.core.dependencies import get_rag_engine, get_vector_db
-from app.core.prompt_loader import get_available_prompts, load_prompt
-from app.services.conversation_service import get_thread, list_threads
+from app.core.dependencies import get_rag_engine
+from app.core.prompt_loader import load_prompt
+from app.services.conversation_service import get_thread
 from app.ui import templates
 
 router = APIRouter()
-
-
-@router.get("/query", response_class=HTMLResponse)
-async def query_page(request: Request, vector_db=Depends(get_vector_db)):
-    """Renders the main Chat/Query layout shell with dynamic prompts"""
-    available_prompts = get_available_prompts(category="system")
-    tenant_id = getattr(request.state, "tenant_id", "default")
-    available_files = await vector_db.get_distinct_sources(tenant_id=tenant_id)
-    threads = await list_threads(tenant_id=tenant_id)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="pages/query.html",
-        context={
-            "available_prompts": available_prompts,
-            "available_files": available_files,
-            "threads": threads,
-        },
-    )
 
 
 @router.post("/ui/query/chat", response_class=HTMLResponse)
