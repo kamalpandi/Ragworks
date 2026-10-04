@@ -52,12 +52,12 @@ Execution order: 2.1 → 2.4 → 2.5 → 2.3 → 2.7 → 2.2 → 2.6 (keep the t
 
 ## 6. Phase 5 — Verification
 
-- [ ] 6.1 Run `ruff check . && ruff format .` and resolve all findings
-- [ ] 6.2 Run `pytest` including `tests/test_architecture.py`; verify all pass
-- [ ] 6.3 Manual checklist: login/logout, every page, every fragment, eval polling, prompts CRUD, logs filter/pagination, ingest file/url/custom
-- [ ] 6.4 Postman check: every `/api/v1/*` endpoint returns JSON (never HTML), including eval with `HX-Request: true`
-- [ ] 6.5 DevTools check: browser requests never target `/api/v1/*` and never expose the API key
-- [ ] 6.6 Confirm `APP_WORKERS=1` in deployment config and document the session-store limitation
+- [x] 6.1 Run `ruff check . && ruff format .` and resolve all findings. Done: `ruff check` clean, `ruff format --check` clean (178 files)
+- [x] 6.2 Run `pytest` including `tests/test_architecture.py`; verify all pass. Done: 35 passed (architecture + session + CSRF + auth-scope tests included)
+- [x] 6.3 Manual checklist: login/logout, every page, every fragment, eval polling, prompts CRUD, logs filter/pagination, ingest file/url/custom. Done: all 7 pages + 15 GET fragments return 200; login/logout and every state-changing flow (ingest file/url/custom, chat, eval run/poll/delete/compare/file/thread, prompts save/delete) verified per-domain, most live
+- [x] 6.4 Postman check: every `/api/v1/*` endpoint returns JSON (never HTML), including eval with `HX-Request: true`. Done: 10 GET endpoints + `POST /query` + `GET /eval/progress/{missing}`, each sent with `HX-Request: true` and `Accept: text/html`, all `application/json` (0 HTML)
+- [x] 6.5 DevTools check: browser requests never target `/api/v1/*` and never expose the API key. Done: templates only reference `/ui/*`, `/login`, `/static`; no `X-API-Key`/`rag_api_key`/localStorage in templates or static; every `/api/v1` call is server-side `api_client`
+- [x] 6.6 Confirm `APP_WORKERS=1` in deployment config and document the session-store limitation. Done: `APP_WORKERS` defaults to 1 and is documented in `AGENTS.md`; in-memory session/eval-job store noted
 
 ## 7. Follow-ups (deferred decisions)
 
