@@ -64,22 +64,3 @@ async def htmx_usage_stats(request: Request):
             "tenant_id": tenant_id,
         },
     )
-
-
-@router.get("/ui/dashboard/docs", response_class=HTMLResponse)
-async def htmx_ingested_docs(request: Request):
-    sources: list[str] = []
-    try:
-        from app.core.dependencies import get_db
-
-        db = get_db()
-        tenant_id = getattr(request.state, "tenant_id", "default")
-        sources = await db.get_distinct_sources(tenant_id=tenant_id)
-    except Exception:
-        pass
-
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/dashboard_docs.html",
-        context={"sources": sources, "count": len(sources)},
-    )

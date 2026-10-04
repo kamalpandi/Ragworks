@@ -76,3 +76,14 @@ async def dashboard_activity(request: Request, session=Depends(require_session))
         name="partials/dashboard_activity.html",
         context={"entries": entries},
     )
+
+
+@router.get("/ui/dashboard/docs")
+async def dashboard_docs(request: Request, session=Depends(require_session)):
+    client = get_backend_client(request)
+    data = (await client.get("/api/v1/ingest/files", api_key=session.api_key)).json()
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/dashboard_docs.html",
+        context={"sources": data["sources"], "count": data["count"]},
+    )
