@@ -7,7 +7,7 @@ status/error span.
 
 import logging
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse
 
 from app.frontend import templates
@@ -54,9 +54,14 @@ def _handle_failure(resp, fallback: str) -> HTMLResponse:
 
 
 @router.get("/ui/ingest/form/file")
-async def get_file_form(request: Request, _session=Depends(require_session)):
+async def get_file_form(request: Request, session=Depends(require_session)):
+    config = (
+        await get_backend_client(request).get("/api/v1/config", api_key=session.api_key)
+    ).json()["config"]
     return templates.TemplateResponse(
-        request=request, name="partials/ingest/file_form.html"
+        request=request,
+        name="partials/ingest/file_form.html",
+        context={"max_upload_mb": config["MAX_UPLOAD_SIZE_MB"]},
     )
 
 
@@ -103,3 +108,32 @@ async def ui_ingest_custom(
     if resp.status_code >= 400:
         return _handle_failure(resp, "Custom text ingestion failed.")
     return _ok("Custom text successfully ingested!")
+
+
+@router.post("/ui/ingest/file")
+async def ui_ingest_file(
+    request: Request,
+    file: UploadFile = File(...),
+    session=Depends(require_session),
+):
+    verify_session_csrf(request, session)
+    if not file.filename:
+        return _err("Missing filename.")
+
+    data = await file.read()
+    resp = await get_backend_client(request).post(
+        "/api/v1/ingest/file",
+        api_key=session.api_key,
+        files={
+            "file": (
+                file.filename,
+                data,
+                file.content_type or "application/octet-stream",
+            )
+        },
+    )
+    if resp.status_code >= 400:
+        return _handle_failure(resp, "Ingestion failed.")
+    payload = resp.json()
+    status_text = str(payload.get("status", "queued")).lower()
+    return _ok(f"'{payload.get('filename') or file.filename}' {status_text}!")
