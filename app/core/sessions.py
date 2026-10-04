@@ -1,7 +1,9 @@
-"""Server-side session storage for the render-only frontend.
+"""Server-side session storage.
 
-A session holds the backend API key server-side. The browser only ever
-receives an opaque session identifier in an HttpOnly cookie.
+A shared server-side concern: the frontend creates sessions at login and the
+authentication middleware reads them to resolve the API key for browser
+requests. The browser only ever holds an opaque session identifier; the API
+key never leaves the server.
 """
 
 import secrets

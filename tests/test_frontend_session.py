@@ -1,5 +1,17 @@
+from types import SimpleNamespace
+
+from app.core.config import settings
+from app.core.sessions import InMemorySessionStore
 from app.frontend.csrf import PreSessionTokenStore, tokens_match
-from app.frontend.session import InMemorySessionStore
+from app.middleware.auth import _session_api_key
+
+
+def _request(session_store=None, cookies=None):
+    state = SimpleNamespace()
+    if session_store is not None:
+        state.session_store = session_store
+    app = SimpleNamespace(state=state)
+    return SimpleNamespace(app=app, cookies=cookies or {})
 
 
 def test_create_and_get():
@@ -53,3 +65,20 @@ def test_tokens_match():
     assert tokens_match("abc", "abd") is False
     assert tokens_match(None, "abc") is False
     assert tokens_match("abc", None) is False
+
+
+def test_session_bridge_resolves_api_key_from_cookie():
+    store = InMemorySessionStore()
+    session = store.create("key-123", "tenant-a")
+    request = _request(store, {settings.SESSION_COOKIE_NAME: session.session_id})
+    assert _session_api_key(request) == "key-123"
+
+
+def test_session_bridge_none_without_cookie():
+    store = InMemorySessionStore()
+    assert _session_api_key(_request(store)) is None
+
+
+def test_session_bridge_none_without_store():
+    request = _request(None, {settings.SESSION_COOKIE_NAME: "missing"})
+    assert _session_api_key(request) is None

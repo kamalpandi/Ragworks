@@ -23,6 +23,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         api_key = _extract_api_key(request)
 
+        # Server-side session bridge: for browser routes (not the JSON API),
+        # resolve the API key from the session so the browser never holds it.
+        if not api_key and not path.startswith("/api/v1"):
+            api_key = _session_api_key(request)
+
         if settings.DEV_API_KEY and api_key == settings.DEV_API_KEY:
             logger.info("dev_key_used", key_prefix=settings.DEV_API_KEY[:8])
             request.state.tenant_id = "dev"
@@ -76,3 +81,15 @@ def _extract_api_key(request: Request) -> str | None:
         return auth_header[7:]
 
     return request.cookies.get("rag_api_key") or None
+
+
+def _session_api_key(request: Request) -> str | None:
+    """Resolve the API key from a server-side session cookie, if present."""
+    session_store = getattr(request.app.state, "session_store", None)
+    if session_store is None:
+        return None
+    session_id = request.cookies.get(settings.SESSION_COOKIE_NAME)
+    if not session_id:
+        return None
+    session = session_store.get(session_id)
+    return session.api_key if session else None

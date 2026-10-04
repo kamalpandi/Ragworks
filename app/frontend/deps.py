@@ -3,9 +3,9 @@
 from fastapi import HTTPException, Request, status
 
 from app.core.config import settings
+from app.core.sessions import InMemorySessionStore, Session
 from app.frontend.api_client import BackendClient
 from app.frontend.csrf import pre_session_tokens, tokens_match
-from app.frontend.session import InMemorySessionStore, Session
 
 
 def get_session_store(request: Request) -> InMemorySessionStore:

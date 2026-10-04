@@ -26,8 +26,8 @@ async def lifespan(app: FastAPI):
     """Startup and shutdown logic for background services."""
     from app.core.migrations import run_migrations
     from app.core.pool import close_pool, init_pool
+    from app.core.sessions import InMemorySessionStore
     from app.frontend.api_client import BackendClient
-    from app.frontend.session import InMemorySessionStore
 
     await init_pool()
     try:

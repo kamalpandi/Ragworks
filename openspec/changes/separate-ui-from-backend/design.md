@@ -46,9 +46,11 @@ Today `AuthMiddleware` is app-wide and validates every non-exempt path with an A
 - **Why**: no new exempt path, no duplicated `validate_api_key` logic, `DEV_API_KEY` handled by existing middleware.
 - **Alternatives**: exempt `POST /auth/session` with a body key — rejected.
 
-### D5: In-memory `SessionStore` behind an interface
+### D5: In-memory `SessionStore` behind an interface, in shared `app.core.sessions`
 Opaque session id in an `HttpOnly`, `SameSite=Lax`, `Secure`(prod) cookie; session data (`api_key`, `tenant_id`, TTL) server-side. `create/get/delete/cleanup`.
 - **Why**: matches topology A and `APP_WORKERS=1`.
+- **Shared, not frontend-owned**: `SessionStore` lives in `app.core.sessions` because it is a server-side concern used by both the frontend (create/read) and `AuthMiddleware` (resolve the API key for browser routes). `app.frontend` may import `app.core.sessions` alongside `app.core.config`; the middleware imports it as an internal backend module. This keeps "the key never reaches the browser" true from 4.1, not just from 4.11.
+- **Bridge**: for non-`/api/v1/*` requests with no presented key, `AuthMiddleware` looks up the session cookie and treats the session's `api_key` as presented (then validates it as usual).
 - **Alternatives**: signed client-side cookie (Starlette `SessionMiddleware`) — rejected, puts key material in the browser; Postgres-backed — deferred.
 - **Constraint**: requires `APP_WORKERS=1`; documented and pinned.
 

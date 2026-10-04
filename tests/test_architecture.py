@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = REPO_ROOT / "app" / "frontend"
 
 # Backend modules a frontend file may never import.
-FRONTEND_ALLOWED = ("app.frontend", "app.core.config")
+FRONTEND_ALLOWED = ("app.frontend", "app.core.config", "app.core.sessions")
 
 BACKEND_DIRS = [
     "app/api",
