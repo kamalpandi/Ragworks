@@ -3,6 +3,7 @@
 from fastapi import HTTPException, Request, status
 
 from app.core.config import settings
+from app.core.csrf import csrf_token_for_request
 from app.core.sessions import InMemorySessionStore, Session
 from app.frontend.api_client import BackendClient
 from app.frontend.csrf import pre_session_tokens, tokens_match
@@ -26,6 +27,12 @@ def get_session(request: Request) -> Session | None:
 def require_session(request: Request) -> Session:
     session = get_session(request)
     if session is None:
+        if request.headers.get("HX-Request"):
+            # HTMX would otherwise follow the 302 and swap the login page into
+            # the target element. HX-Redirect triggers a full-page navigation.
+            raise HTTPException(
+                status_code=status.HTTP_200_OK, headers={"HX-Redirect": "/login"}
+            )
         raise HTTPException(
             status_code=status.HTTP_302_FOUND,
             headers={"Location": f"/login?next={request.url.path}"},
@@ -34,15 +41,8 @@ def require_session(request: Request) -> Session:
 
 
 def get_csrf_token(request: Request) -> str:
-    """Return the session CSRF token, or issue a pre-session token if unauthenticated.
-
-    This single helper covers both `GET /login` (pre-session) and every
-    authenticated page/fragment (session token), so views never branch.
-    """
-    session = get_session(request)
-    if session is not None:
-        return session.csrf_token
-    return pre_session_tokens.issue()
+    """Return the session CSRF token, or a pre-session token if unauthenticated."""
+    return csrf_token_for_request(request)
 
 
 def verify_session_csrf(request: Request, session: Session) -> None:

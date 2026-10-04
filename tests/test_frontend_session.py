@@ -1,17 +1,26 @@
 from types import SimpleNamespace
 
+import pytest
+from fastapi import HTTPException
+
 from app.core.config import settings
 from app.core.sessions import InMemorySessionStore
 from app.frontend.csrf import PreSessionTokenStore, tokens_match
+from app.frontend.deps import require_session
 from app.middleware.auth import _session_api_key
 
 
-def _request(session_store=None, cookies=None):
+def _request(session_store=None, cookies=None, headers=None, path="/"):
     state = SimpleNamespace()
     if session_store is not None:
         state.session_store = session_store
     app = SimpleNamespace(state=state)
-    return SimpleNamespace(app=app, cookies=cookies or {})
+    return SimpleNamespace(
+        app=app,
+        cookies=cookies or {},
+        headers=headers or {},
+        url=SimpleNamespace(path=path),
+    )
 
 
 def test_create_and_get():
@@ -82,3 +91,17 @@ def test_session_bridge_none_without_cookie():
 def test_session_bridge_none_without_store():
     request = _request(None, {settings.SESSION_COOKIE_NAME: "missing"})
     assert _session_api_key(request) is None
+
+
+def test_require_session_redirects_htmx_with_header():
+    with pytest.raises(HTTPException) as exc:
+        require_session(_request(headers={"HX-Request": "true"}, path="/query"))
+    assert exc.value.status_code == 200
+    assert exc.value.headers["HX-Redirect"] == "/login"
+
+
+def test_require_session_redirects_browser():
+    with pytest.raises(HTTPException) as exc:
+        require_session(_request(path="/query"))
+    assert exc.value.status_code == 302
+    assert exc.value.headers["Location"].startswith("/login")

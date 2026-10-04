@@ -55,7 +55,19 @@
         localStorage.removeItem("rag_api_key");
         localStorage.removeItem("rag_tenant_id");
         document.cookie = "rag_api_key=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        window.location.href = "/login";
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var form = document.createElement("form");
+        form.method = "post";
+        form.action = "/logout";
+        if (meta && meta.content) {
+          var token = document.createElement("input");
+          token.type = "hidden";
+          token.name = "csrf_token";
+          token.value = meta.content;
+          form.appendChild(token);
+        }
+        document.body.appendChild(form);
+        form.submit();
       }
 
       function updateLogoutLink() {
