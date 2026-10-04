@@ -1,6 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import JSONResponse, RedirectResponse, Response
 
 from app.core.config import settings
 from app.observability.logger import get_logger
@@ -42,6 +42,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             if is_admin:
                 request.state.tenant_id = "admin"
                 return await call_next(request)
+            if request.headers.get("HX-Request"):
+                # Let HTMX do a full-page navigation instead of swapping in
+                # the login page (or a 401 body) into the target element.
+                return Response(status_code=200, headers={"HX-Redirect": "/login"})
             if "text/html" in request.headers.get("Accept", ""):
                 from urllib.parse import urlencode
 

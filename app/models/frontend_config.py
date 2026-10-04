@@ -11,7 +11,7 @@ class FrontendConfig(BaseModel):
     USE_LOCAL_DB: bool
 
     # Provider Matrix
-    LLM_PROVIDER: Literal["openai", "ollama", "llamacpp"]
+    LLM_PROVIDER: Literal["openai", "ollama", "llamacpp", "deepseek"]
     LOCAL_MODEL: str
     AVAILABLE_LOCAL_MODELS: list[str]
     LLM_MODEL: str
