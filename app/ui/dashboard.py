@@ -18,11 +18,6 @@ def _get_card_class(status: str) -> str:
     return "var(--pico-muted-color)"
 
 
-@router.get("/", response_class=HTMLResponse)
-def dashboard(request: Request):
-    return templates.TemplateResponse(request=request, name="pages/dashboard.html")
-
-
 @router.get("/ui/dashboard/status", response_class=HTMLResponse)
 async def htmx_status_cards(request: Request):
     from app.core.pool import get_pool

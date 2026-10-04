@@ -56,6 +56,8 @@ extend-exclude = ["scripts/emails/test_data"]
 # FastAPI dependency/parameter idioms: Depends/File/Query in defaults (B008)
 # and deliberate re-raises in handlers (B904).
 "app/api/**" = ["B008", "B904"]
+# Frontend views are also FastAPI endpoints (same dependency idioms).
+"app/frontend/**" = ["B008", "B904"]
 # The eval background job intentionally records any failure on the job.
 "app/api/v1/endpoints/eval.py" = ["BLE001"]
 # Legacy HTMX UI layer, replaced by app/frontend and deleted in Phase 4.
