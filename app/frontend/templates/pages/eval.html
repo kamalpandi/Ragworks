@@ -48,7 +48,7 @@
   <article>
     <header>Run Evaluation from Thread</header>
     <form
-      hx-post="/api/v1/eval/run/thread/{{ threads[0].thread_id if threads else '' }}"
+      hx-post="/ui/eval/run/thread/{{ threads[0].thread_id if threads else '' }}"
       hx-target="#eval-run-area"
       hx-swap="innerHTML"
       hx-indicator="#eval-run-spinner"
@@ -57,7 +57,7 @@
       <div style="display: flex; gap: 1rem; align-items: end">
         <label>
           Thread
-          <select name="thread_id" onchange="document.getElementById('eval-thread-form').setAttribute('hx-post', '/api/v1/eval/run/thread/' + this.value)">
+          <select name="thread_id" onchange="document.getElementById('eval-thread-form').setAttribute('hx-post', '/ui/eval/run/thread/' + this.value)">
             <option value="">-- Select a thread --</option>
             {% for t in threads %}
             <option value="{{ t.thread_id }}">
@@ -82,7 +82,7 @@
   <article>
     <header>Run Evaluation from File</header>
     <form
-      hx-post="/api/v1/eval/run/file"
+      hx-post="/ui/eval/run/file"
       hx-target="#eval-run-area"
       hx-swap="innerHTML"
       hx-encoding="multipart/form-data"

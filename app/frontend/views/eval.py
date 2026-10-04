@@ -10,7 +10,7 @@ results and compare fragments refresh.
 import logging
 
 import httpx
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse
 
 from app.frontend import templates
@@ -91,6 +91,80 @@ async def ui_eval_run(
         status="running",
         current=0,
         total=data.get("total", 0),
+    )
+
+
+@router.post("/ui/eval/run/file", response_class=HTMLResponse)
+async def ui_eval_run_file(
+    request: Request,
+    file: UploadFile = File(...),
+    file_filter: str | None = Form(None),
+    metric_names: str | None = Form(None),
+    session=Depends(require_session),
+):
+    verify_session_csrf(request, session)
+    if not file.filename:
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/error_banner.html",
+            context={"title": "Evaluation failed:", "message": "Missing dataset file."},
+            headers={"HX-Retarget": "#eval-error", "HX-Reswap": "innerHTML"},
+        )
+
+    data = await file.read()
+    params = {
+        k: v
+        for k, v in {"file_filter": file_filter, "metric_names": metric_names}.items()
+        if v
+    }
+    resp = await get_backend_client(request).post(
+        "/api/v1/eval/run/file",
+        params=params,
+        files={"file": (file.filename, data, file.content_type or "application/json")},
+        api_key=session.api_key,
+    )
+    if resp.status_code >= 400:
+        return _eval_error(request, resp)
+
+    payload = resp.json()
+    return _progress(
+        request,
+        run_id=payload["run_id"],
+        status="running",
+        current=0,
+        total=payload.get("total", 0),
+    )
+
+
+@router.post("/ui/eval/run/thread/{thread_id}", response_class=HTMLResponse)
+async def ui_eval_run_thread(
+    request: Request,
+    thread_id: str,
+    file_filter: str | None = Form(None),
+    metric_names: str | None = Form(None),
+    session=Depends(require_session),
+):
+    verify_session_csrf(request, session)
+    params = {
+        k: v
+        for k, v in {"file_filter": file_filter, "metric_names": metric_names}.items()
+        if v
+    }
+    resp = await get_backend_client(request).post(
+        f"/api/v1/eval/run/thread/{thread_id}",
+        params=params,
+        api_key=session.api_key,
+    )
+    if resp.status_code >= 400:
+        return _eval_error(request, resp)
+
+    payload = resp.json()
+    return _progress(
+        request,
+        run_id=payload["run_id"],
+        status="running",
+        current=0,
+        total=payload.get("total", 0),
     )
 
 
