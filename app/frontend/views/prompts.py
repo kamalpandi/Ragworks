@@ -147,3 +147,25 @@ async def ui_prompts_save(
         return _error(request, _detail(resp), retarget=True)
 
     return await _list(request, session)
+
+
+@router.delete("/ui/prompts/delete/{category}/{name}", response_class=HTMLResponse)
+async def ui_prompts_delete(
+    request: Request,
+    category: str,
+    name: str,
+    session=Depends(require_session),
+):
+    verify_session_csrf(request, session)
+    resp = await get_backend_client(request).delete(
+        f"/api/v1/prompts/{name}",
+        params={"category": category},
+        api_key=session.api_key,
+    )
+    if resp.status_code >= 400:
+        logger.warning(
+            "prompts_delete_failed status=%s name=%s", resp.status_code, name
+        )
+        return _error(request, _detail(resp), retarget=True)
+
+    return await _list(request, session)

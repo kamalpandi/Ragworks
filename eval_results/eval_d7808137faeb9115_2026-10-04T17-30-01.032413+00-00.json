@@ -1,0 +1,25 @@
+{
+  "id": "d7808137faeb9115",
+  "timestamp": "2026-10-04T17:30:01.032413+00:00",
+  "dataset_name": "Thread: \"Reply with the single word: pong\" — 1 pairs",
+  "num_samples": 1,
+  "metrics": [
+    {
+      "name": "faithfulness",
+      "value": 0.0,
+      "description": "Mean over 1 samples"
+    }
+  ],
+  "aggregated_scores": {
+    "faithfulness": 0.0
+  },
+  "config_snapshot": {
+    "reranker_enabled": true,
+    "reranker_provider": "flashrank",
+    "chunking_strategy": "recursive",
+    "top_k": 10,
+    "llm_model": "gpt-4o-mini"
+  },
+  "thread_id": "live-t1",
+  "thread_label": "\"Reply with the single word: pong\" — 1 pairs"
+}

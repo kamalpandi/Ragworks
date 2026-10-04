@@ -16,7 +16,6 @@ from app.middleware.rate_limit import RateLimitMiddleware
 from app.observability.logger import setup_logging
 from app.observability.middleware import ObservabilityMiddleware
 from app.observability.tracing import init_tracing
-from app.ui.router import ui_router
 
 init_tracing()
 setup_logging()
@@ -87,7 +86,6 @@ app.add_middleware(
 
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(frontend_router)
-app.include_router(ui_router)
 
 
 @app.get("/health")

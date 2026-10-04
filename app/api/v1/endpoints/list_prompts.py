@@ -14,9 +14,7 @@ router = APIRouter()
 
 
 class PromptSaveRequest(BaseModel):
-    category: Literal["system", "user"] = Field(
-        ..., description="'system' or 'user'"
-    )
+    category: Literal["system", "user"] = Field(..., description="'system' or 'user'")
     content: str = Field(..., description="Markdown content of the prompt")
 
 

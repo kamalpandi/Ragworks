@@ -1,0 +1,31 @@
+{
+  "id": "1ed4dbbdc5e999c6",
+  "timestamp": "2026-10-04T17:30:12.653502+00:00",
+  "dataset_name": "ds.json",
+  "num_samples": 1,
+  "metrics": [
+    {
+      "name": "bleu",
+      "value": 0.0,
+      "description": "Mean over 1 samples"
+    },
+    {
+      "name": "rouge_l",
+      "value": 0.2857142857142857,
+      "description": "Mean over 1 samples"
+    }
+  ],
+  "aggregated_scores": {
+    "bleu": 0.0,
+    "rouge_l": 0.2857142857142857
+  },
+  "config_snapshot": {
+    "reranker_enabled": true,
+    "reranker_provider": "flashrank",
+    "chunking_strategy": "recursive",
+    "top_k": 10,
+    "llm_model": "gpt-4o-mini"
+  },
+  "thread_id": null,
+  "thread_label": null
+}
