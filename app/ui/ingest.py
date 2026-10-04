@@ -9,13 +9,6 @@ from app.ui import templates
 router = APIRouter()
 
 
-# --- Ingestion UI Page ---
-@router.get("/ingest", response_class=HTMLResponse)
-def ingest_page(request: Request):
-    """Renders the main Ingestion layout shell"""
-    return templates.TemplateResponse(request=request, name="pages/ingest.html")
-
-
 # --- HTMX Tab Form Providers ---
 @router.get("/ui/ingest/form/file", response_class=HTMLResponse)
 def get_file_form(request: Request):

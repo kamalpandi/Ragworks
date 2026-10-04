@@ -20,3 +20,8 @@ async def dashboard_page(request: Request, _session=Depends(require_session)):
 @router.get("/config")
 async def config_page(request: Request, _session=Depends(require_session)):
     return templates.TemplateResponse(request=request, name="pages/config.html")
+
+
+@router.get("/ingest")
+async def ingest_page(request: Request, _session=Depends(require_session)):
+    return templates.TemplateResponse(request=request, name="pages/ingest.html")
