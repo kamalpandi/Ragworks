@@ -37,7 +37,7 @@ docker run -d \
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-Server is now running at **http://localhost:8000**.
+Server is now running at **<http://localhost:8000>**.
 
 ---
 
@@ -72,6 +72,7 @@ DEV_API_KEY=dev-skip-auth
 ```
 
 Default settings work out of the box:
+
 - Database: `postgresql://user:password@localhost:5432/rag_db`
 - LLM: `openai` with `gpt-4o-mini`
 - Chunking: `recursive`
@@ -118,6 +119,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1
 ```
 
 The server initializes in this order:
+
 1. OpenTelemetry tracing
 2. Structured logging (structlog)
 3. Connection pool to PostgreSQL (retries up to 10 times if DB isn't ready)
@@ -174,12 +176,12 @@ curl -X POST "http://localhost:8000/api/v1/query" \
 
 | Page          | URL                         |
 |---------------|-----------------------------|
-| Dashboard     | http://localhost:8000/      |
-| Query Chat    | http://localhost:8000/query |
-| Ingest        | http://localhost:8000/ingest|
-| Config        | http://localhost:8000/config|
-| Prompts       | http://localhost:8000/prompts|
-| API Docs      | http://localhost:8000/docs  |
+| Dashboard     | <http://localhost:8000/>      |
+| Query Chat    | <http://localhost:8000/query> |
+| Ingest        | <http://localhost:8000/ingest>|
+| Config        | <http://localhost:8000/config>|
+| Prompts       | <http://localhost:8000/prompts>|
+| API Docs      | <http://localhost:8000/docs>  |
 
 ---
 
