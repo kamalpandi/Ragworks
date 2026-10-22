@@ -17,6 +17,7 @@ from app.observability.logger import setup_logging
 from app.observability.middleware import ObservabilityMiddleware
 from app.observability.tracing import init_tracing
 
+# logging
 init_tracing()
 setup_logging()
 
